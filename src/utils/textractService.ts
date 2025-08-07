@@ -1,4 +1,4 @@
-import { TextractClient, DetectDocumentTextCommand, AnalyzeDocumentCommand } from '@aws-sdk/client-textract';
+import { TextractClient, DetectDocumentTextCommand, AnalyzeDocumentCommand, DetectDocumentTextResponse, AnalyzeDocumentResponse, Block } from '@aws-sdk/client-textract';
 
 // Initialize Textract client
 const textractClient = new TextractClient({
@@ -12,7 +12,7 @@ const textractClient = new TextractClient({
 export interface TextractResult {
   text: string;
   confidence: number;
-  blocks?: any[];
+  blocks?: Block[];
 }
 
 export interface TextractError {
@@ -56,11 +56,13 @@ export async function extractTextFromDocument(
       const response = await textractClient.send(command);
       return processDetectDocumentTextResponse(response);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Textract error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to extract text from document';
+    const errorCode = error instanceof Error ? error.name : 'TEXTRACT_ERROR';
     throw {
-      message: error.message || 'Failed to extract text from document',
-      code: error.name || 'TEXTRACT_ERROR',
+      message: errorMessage,
+      code: errorCode,
     } as TextractError;
   }
 }
@@ -86,17 +88,17 @@ async function fileToBytes(file: File): Promise<Uint8Array> {
 /**
  * Process response from DetectDocumentText
  */
-function processDetectDocumentTextResponse(response: any): TextractResult {
+function processDetectDocumentTextResponse(response: DetectDocumentTextResponse): TextractResult {
   const blocks = response.Blocks || [];
-  const textBlocks = blocks.filter((block: any) => block.BlockType === 'LINE');
+  const textBlocks = blocks.filter((block: Block) => block.BlockType === 'LINE');
   
   const text = textBlocks
-    .map((block: any) => block.Text)
+    .map((block: Block) => block.Text || '')
     .join('\n');
   
   // Calculate average confidence
   const confidences = textBlocks
-    .map((block: any) => block.Confidence || 0)
+    .map((block: Block) => block.Confidence || 0)
     .filter((conf: number) => conf > 0);
   
   const avgConfidence = confidences.length > 0 
@@ -113,17 +115,17 @@ function processDetectDocumentTextResponse(response: any): TextractResult {
 /**
  * Process response from AnalyzeDocument
  */
-function processAnalyzeDocumentResponse(response: any): TextractResult {
+function processAnalyzeDocumentResponse(response: AnalyzeDocumentResponse): TextractResult {
   const blocks = response.Blocks || [];
-  const textBlocks = blocks.filter((block: any) => block.BlockType === 'LINE');
+  const textBlocks = blocks.filter((block: Block) => block.BlockType === 'LINE');
   
   const text = textBlocks
-    .map((block: any) => block.Text)
+    .map((block: Block) => block.Text || '')
     .join('\n');
   
   // Calculate average confidence
   const confidences = blocks
-    .map((block: any) => block.Confidence || 0)
+    .map((block: Block) => block.Confidence || 0)
     .filter((conf: number) => conf > 0);
   
   const avgConfidence = confidences.length > 0 

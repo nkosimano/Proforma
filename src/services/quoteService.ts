@@ -141,30 +141,7 @@ export const updateQuote = async (id: string, quote: Partial<Quote>): Promise<Qu
   return data;
 };
 
-export const importQuotes = async (quotes: Omit<Quote, 'id'>[]): Promise<boolean> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
 
-  // Add user_id to all quotes for RLS
-  const quotesWithUserId = quotes.map(quote => ({
-    ...quote,
-    client_details: {
-      ...quote.client_details,
-      user_id: user.id,
-    },
-  }));
-
-  const { error } = await supabase
-    .from('quotes')
-    .insert(quotesWithUserId);
-
-  if (error) {
-    console.error('Error importing quotes:', error);
-    return false;
-  }
-
-  return true;
-};
 
 export const updateQuoteStatus = async (id: string, status: Quote['status']): Promise<boolean> => {
   const { error } = await supabase

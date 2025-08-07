@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { ProfessionType, PROFESSION_THEMES } from '../constants/professions';
 import { AppSettings } from '../types';
@@ -14,7 +14,7 @@ interface SettingsContextType {
 }
 
 // Create context
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+export const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 // Provider props
 interface SettingsProviderProps {
@@ -172,13 +172,4 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       {children}
     </SettingsContext.Provider>
   );
-}
-
-// Custom hook to use settings
-export function useSettings() {
-  const context = useContext(SettingsContext);
-  if (context === undefined) {
-    throw new Error('useSettings must be used within a SettingsProvider');
-  }
-  return context;
 }

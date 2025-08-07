@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { FileText, Settings, Home, Users, Receipt, UserCheck, BarChart3, RefreshCw, Shield, DollarSign, TrendingUp, ChevronDown } from 'lucide-react';
-import { useSettings } from '../context/SettingsProvider';
-import { useTerminology } from '../context/TerminologyProvider';
+import { FileText, Settings, Home, Users, Receipt, UserCheck, BarChart3, RefreshCw, Shield, DollarSign, TrendingUp, ChevronDown, Menu, X } from 'lucide-react';
+import { useSettings } from '../hooks/useSettings';
+import { useTerminology } from '../hooks/useTerminology';
 import { ProfessionIcon } from './ProfessionIcon';
 
 interface NavigationProps {
@@ -24,6 +24,7 @@ interface NavGroup {
 
 export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { settings } = useSettings();
   const { getTerminology } = useTerminology();
@@ -100,6 +101,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate 
   const handleItemClick = (pageId: typeof currentPage) => {
     onNavigate(pageId);
     setOpenDropdown(null);
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -198,8 +200,73 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate 
               </div>
             </div>
           </div>
+          
+          {/* Mobile menu button */}
+          <div className="sm:hidden flex items-center">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Open main menu</span>
+              {mobileMenuOpen ? (
+                <X className="block h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="block h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
+      
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden">
+          <div className="pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+            {navGroups.map((group) => (
+              <div key={group.id} className="px-4 py-2">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  {group.label}
+                </div>
+                {group.items.map((item) => {
+                  const ItemIcon = item.icon;
+                  const isItemActive = currentPage === item.id;
+                  
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleItemClick(item.id)}
+                      className={`w-full text-left flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                        isItemActive
+                          ? 'bg-blue-50 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <ItemIcon className="h-5 w-5 mr-3" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+            
+            {/* Settings in mobile menu */}
+            <div className="px-4 py-2 border-t border-gray-200">
+              <button
+                onClick={() => handleItemClick(settingsItem.id)}
+                className={`w-full text-left flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  currentPage === settingsItem.id
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <Settings className="h-5 w-5 mr-3" />
+                {settingsItem.label}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

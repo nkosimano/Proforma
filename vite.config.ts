@@ -7,4 +7,17 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  server: {
+    proxy: {
+      '/api/textract': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/textract/, '/api/textract')
+      },
+      '/api': {
+        target: 'http://127.0.0.1:54321',
+        changeOrigin: true
+      }
+    }
+  }
 });

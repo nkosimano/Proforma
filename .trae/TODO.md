@@ -1,7 +1,10 @@
 # TODO:
 
-- [x] 103: Create .env file with AWS credentials (note: need to verify secret key as same value was provided twice) (priority: High)
-- [x] 104: Install AWS SDK for JavaScript (priority: High)
-- [x] 105: Create Textract service for document text extraction (priority: High)
-- [x] 106: Integrate Textract with existing document upload functionality (priority: Medium)
-- [x] 107: Test Textract integration with sample documents (priority: Medium)
+- [x] 126: Run lint check to identify all linting errors (priority: High)
+- [x] 127: Fix all ESLint and TypeScript linting errors (priority: High)
+- [x] 128: Run build process to identify build errors (priority: High)
+- [x] 129: Fix all build and compilation errors (priority: High)
+- [x] 130: Check and fix any CI/CD configuration issues (priority: Medium)
+- [ ] 131: Stage all changes for git commit (**IN PROGRESS**) (priority: Medium)
+- [ ] 132: Commit changes with descriptive message (priority: Medium)
+- [ ] 133: Push code to git repository (priority: Medium)

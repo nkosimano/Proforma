@@ -1,39 +1,17 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { TextractClient, AnalyzeDocumentCommand, AnalyzeDocumentResponse, Block } from '@aws-sdk/client-textract';
+const express = require('express');
+const { TextractClient, DetectDocumentTextCommand, AnalyzeDocumentCommand } = require('@aws-sdk/client-textract');
+const router = express.Router();
 
 // Initialize Textract client
 const textractClient = new TextractClient({
   region: process.env.AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
-interface ExtractedQuoteData {
-  quote_number?: string;
-  invoice_number?: string;
-  client_name?: string;
-  client_email?: string;
-  client_address?: string;
-  line_items: Array<{
-    description: string;
-    quantity: number;
-    unit_price: number;
-    line_total: number;
-  }>;
-  subtotal?: number;
-  vat?: number;
-  total?: number;
-  date?: string;
-  confidence: number;
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+router.post('/process-document', async (req, res) => {
   try {
     const { fileData, fileName } = req.body;
 
@@ -70,38 +48,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
       data: extractedData
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Textract processing error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to process document';
     return res.status(500).json({
       success: false,
-      error: errorMessage
+      error: error.message || 'Failed to process document'
     });
   }
-}
+});
 
-function processTextractResponse(response: AnalyzeDocumentResponse): ExtractedQuoteData {
+function processTextractResponse(response) {
   const blocks = response.Blocks || [];
-  const textBlocks = blocks.filter((block: Block) => block.BlockType === 'LINE');
+  const textBlocks = blocks.filter(block => block.BlockType === 'LINE');
   
   const text = textBlocks
-    .map((block: Block) => block.Text || '')
+    .map(block => block.Text)
     .join('\n');
   
   // Calculate average confidence
   const confidences = blocks
-    .map((block: Block) => block.Confidence || 0)
-    .filter((conf: number) => conf > 0);
+    .map(block => block.Confidence || 0)
+    .filter(conf => conf > 0);
   
   const avgConfidence = confidences.length > 0 
-    ? confidences.reduce((sum: number, conf: number) => sum + conf, 0) / confidences.length
+    ? confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
     : 0;
 
   return parseTextToQuoteData(text, avgConfidence);
 }
 
-function parseTextToQuoteData(text: string, confidence: number): ExtractedQuoteData {
-  const data: ExtractedQuoteData = {
+function parseTextToQuoteData(text, confidence) {
+  const data = {
     line_items: [],
     confidence
   };
@@ -130,7 +107,7 @@ function parseTextToQuoteData(text: string, confidence: number): ExtractedQuoteD
   }
 
   // Extract date
-  const dateMatch = text.match(/(?:date|issued)\s*:?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/i);
+  const dateMatch = text.match(/(?:date|issued)\s*:?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i);
   if (dateMatch) {
     data.date = dateMatch[1];
   }
@@ -176,3 +153,5 @@ function parseTextToQuoteData(text: string, confidence: number): ExtractedQuoteD
 
   return data;
 }
+
+module.exports = router;

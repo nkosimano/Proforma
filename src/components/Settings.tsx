@@ -4,7 +4,7 @@ import { getCompanyProfile, createCompanyProfile, updateCompanyProfile, uploadLo
 import { PDFTemplateSelector } from './PDFTemplateSelector';
 import { ProfessionIcon } from './ProfessionIcon';
 import type { CompanyProfile } from '../types';
-import { useSettings } from '../context/SettingsProvider';
+import { useSettings } from '../hooks/useSettings';
 import { PROFESSION_OPTIONS, ProfessionType } from '../constants/professions';
 
 export const Settings: React.FC = () => {
@@ -181,7 +181,7 @@ export const Settings: React.FC = () => {
         )}
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Column */}
           <div className="space-y-6">
             {/* Company Profile Section */}
@@ -197,8 +197,8 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company Logo
                     </label>
@@ -270,7 +270,7 @@ export const Settings: React.FC = () => {
                   placeholder="Enter your email address"
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Address *
                 </label>
@@ -278,7 +278,7 @@ export const Settings: React.FC = () => {
                   value={companyProfile.address}
                   onChange={(e) => handleCompanyInputChange('address', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   placeholder="Enter your company address"
                 />
               </div>

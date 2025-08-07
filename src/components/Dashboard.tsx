@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Settings, Building, Eye, Edit, Upload, CheckCircle, XCircle, ArrowRight, Brain } from 'lucide-react';
-import { getQuotes, importQuotes, updateQuoteStatus } from '../services/quoteService';
+import { FileText, Plus, Settings, Building, Eye, Edit, CheckCircle, XCircle, ArrowRight, Brain } from 'lucide-react';
+import { getQuotes, updateQuoteStatus } from '../services/quoteService';
 import { createInvoiceFromQuote } from '../services/invoiceService';
 import { getCompanyProfile } from '../services/companyService';
 import { pdfTemplates } from '../constants/pdfTemplates';
@@ -23,9 +23,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
-  const [showImport, setShowImport] = useState(false);
-  const [importData, setImportData] = useState('');
-  const [importing, setImporting] = useState(false);
+
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [convertingQuote, setConvertingQuote] = useState<string | null>(null);
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
@@ -148,47 +146,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     setPdfResult(null);
   };
 
-  const handleImportQuotes = async () => {
-    if (!importData.trim()) {
-      setImportMessage({ type: 'error', text: 'Please paste your quote data' });
-      return;
-    }
 
-    setImporting(true);
-    setImportMessage(null);
-
-    try {
-      const parsedQuotes = JSON.parse(importData);
-      
-      // Validate the structure
-      if (!Array.isArray(parsedQuotes)) {
-        throw new Error('Data must be an array of quotes');
-      }
-
-      // Basic validation for each quote
-      for (const quote of parsedQuotes) {
-        if (!quote.quote_number || !quote.client_details || !quote.line_items || !quote.totals) {
-          throw new Error('Invalid quote structure. Each quote must have quote_number, client_details, line_items, and totals');
-        }
-      }
-
-      const success = await importQuotes(parsedQuotes);
-      if (success) {
-        setImportMessage({ type: 'success', text: `Successfully imported ${parsedQuotes.length} quotes!` });
-        setImportData('');
-        setShowImport(false);
-        await refreshQuotes();
-        setTimeout(() => setImportMessage(null), 3000);
-      } else {
-        setImportMessage({ type: 'error', text: 'Failed to import quotes' });
-      }
-    } catch (error) {
-      console.error('Import error:', error);
-      setImportMessage({ type: 'error', text: 'Invalid JSON format or quote structure' });
-    } finally {
-      setImporting(false);
-    }
-  };
 
   const handleEditQuote = (quote: Quote) => {
     setEditingQuote(quote);
@@ -376,13 +334,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <Brain className="h-4 w-4 mr-2" />
                   AI Import
                 </button>
-                <button
-                  onClick={() => setShowImport(true)}
-                  className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Import Quotes
-                </button>
+
                 <span className="text-sm text-gray-500">{quotes.length} total</span>
               </div>
             </div>
@@ -491,101 +443,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Import Modal */}
-        {showImport && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
-              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Import Previous Quotes</h2>
-                <button
-                  onClick={() => setShowImport(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="p-6">
-                <div className="mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Import Instructions</h3>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-                    <p className="mb-2">Paste your quotes data in JSON format. Each quote should have:</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li><code>quote_number</code>: The quote number (e.g., "QU-1001")</li>
-                      <li><code>client_details</code>: Object with name, address, email, etc.</li>
-                      <li><code>line_items</code>: Array of items with description, quantity, unit_price</li>
-                      <li><code>totals</code>: Object with subtotal, vat, total amounts</li>
-                    </ul>
-                  </div>
-                </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quote Data (JSON Format)
-                  </label>
-                  <textarea
-                    value={importData}
-                    onChange={(e) => setImportData(e.target.value)}
-                    rows={12}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-                    placeholder={`[
-  {
-    "quote_number": "QU-1001",
-    "client_details": {
-      "name": "Client Name",
-      "address": "Client Address",
-      "email": "client@example.com",
-      "company_registration_number": "2023/123456/07"
-    },
-    "line_items": [
-      {
-        "id": "1",
-        "description": "Service Description",
-        "quantity": 1,
-        "unit_price": 1000,
-        "line_total": 1000
-      }
-    ],
-    "totals": {
-      "subtotal": 1000,
-      "vat": 150,
-      "total": 1150
-    }
-  }
-]`}
-                  />
-                </div>
-
-                {importMessage && (
-                  <div className={`mb-4 p-3 rounded-lg ${
-                    importMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                  }`}>
-                    {importMessage.text}
-                  </div>
-                )}
-
-                <div className="flex justify-end space-x-4">
-                  <button
-                    onClick={() => setShowImport(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleImportQuotes}
-                    disabled={importing || !importData.trim()}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {importing ? 'Importing...' : 'Import Quotes'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* AI Document Upload Modal */}
         {showDocumentUpload && (

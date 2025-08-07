@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { AlertCircle, ToggleLeft, ToggleRight, X } from 'lucide-react';
-import { useSettings } from '../context/SettingsProvider';
+import { useSettings } from '../hooks/useSettings';
 import { ProfessionType } from '../constants/professions';
-import { useTerminology } from '../context/TerminologyProvider';
+import { useTerminology } from '../hooks/useTerminology';
 import { GENERAL_TERMINOLOGY, PROFESSION_TERMINOLOGY } from '../constants/terminology';
 import { ProfessionIcon } from './ProfessionIcon';
 

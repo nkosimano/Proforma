@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 import { ProfessionType } from '../constants/professions';
 import { GENERAL_TERMINOLOGY, PROFESSION_TERMINOLOGY } from '../constants/terminology';
 
@@ -9,7 +9,7 @@ interface TerminologyContextType {
   hasTerminologyDifferences: (profession: ProfessionType) => boolean;
 }
 
-const TerminologyContext = createContext<TerminologyContextType | undefined>(undefined);
+export const TerminologyContext = createContext<TerminologyContextType | undefined>(undefined);
 
 interface TerminologyProviderProps {
   children: ReactNode;
@@ -46,12 +46,4 @@ export function TerminologyProvider({ children }: TerminologyProviderProps) {
       {children}
     </TerminologyContext.Provider>
   );
-}
-
-export function useTerminology() {
-  const context = useContext(TerminologyContext);
-  if (context === undefined) {
-    throw new Error('useTerminology must be used within a TerminologyProvider');
-  }
-  return context;
 }
