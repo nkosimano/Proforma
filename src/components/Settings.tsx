@@ -91,8 +91,13 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handleInputChange = async (field: keyof typeof settings, value: string | number) => {
+  const handleInputChange = async (field: string, value: string | number) => {
     try {
+      if (!settings) {
+        setMessage({ type: 'error', text: 'Settings not loaded' });
+        return;
+      }
+      
       if (field === 'profession') {
         // Use the specific updateProfession method for profession changes
         await updateProfession(value as ProfessionType);
@@ -151,7 +156,7 @@ export const Settings: React.FC = () => {
     setCompanyProfile({ ...companyProfile, logo_url: '' });
   };
 
-  if (settingsLoading) {
+  if (settingsLoading || !settings) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

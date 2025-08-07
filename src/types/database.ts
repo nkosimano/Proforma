@@ -238,13 +238,23 @@ export type Database = {
           role: string
           created_by: string
           created_at: string
+          name: string | null
+          description: string | null
+          permissions: Json
+          is_active: boolean
+          updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          role: string
-          created_by: string
+          role?: string
+          created_by?: string
           created_at?: string
+          name?: string | null
+          description?: string | null
+          permissions?: Json
+          is_active?: boolean
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -252,6 +262,11 @@ export type Database = {
           role?: string
           created_by?: string
           created_at?: string
+          name?: string | null
+          description?: string | null
+          permissions?: Json
+          is_active?: boolean
+          updated_at?: string
         }
         Relationships: []
       }

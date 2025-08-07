@@ -36,11 +36,10 @@ export class DocumentProcessor {
         reader.readAsDataURL(file);
       });
 
-      // Call our Supabase Edge Function that handles Textract
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-document`, {
+      // Call our backend API that handles Textract
+      const response = await fetch('/api/textract/process-document', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
