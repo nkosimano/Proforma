@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Quote } from '../types';
 import { getQuotes, updateQuoteStatus, deleteQuote } from '../services/quoteService';
 import { Search, Filter, Eye, Edit, Trash2, CheckCircle, XCircle, FileText, Calendar, User, DollarSign } from 'lucide-react';
@@ -24,7 +24,7 @@ export const QuoteHistory: React.FC<QuoteHistoryProps> = ({ onEditQuote }) => {
 
   useEffect(() => {
     filterQuotes();
-  }, [quotes, searchTerm, statusFilter, dateFilter]);
+  }, [quotes, searchTerm, statusFilter, dateFilter, filterQuotes]);
 
   const loadQuotes = async () => {
     setLoading(true);
@@ -38,7 +38,7 @@ export const QuoteHistory: React.FC<QuoteHistoryProps> = ({ onEditQuote }) => {
     }
   };
 
-  const filterQuotes = () => {
+  const filterQuotes = useCallback(() => {
     let filtered = [...quotes];
 
     // Search filter
@@ -76,7 +76,7 @@ export const QuoteHistory: React.FC<QuoteHistoryProps> = ({ onEditQuote }) => {
     }
 
     setFilteredQuotes(filtered);
-  };
+  }, [quotes, searchTerm, statusFilter, dateFilter]);
 
   const handleStatusUpdate = async (quoteId: string, status: Quote['status']) => {
     const success = await updateQuoteStatus(quoteId, status);

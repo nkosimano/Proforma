@@ -6,11 +6,20 @@ import { Invoices } from './components/Invoices';
 import { Customers } from './components/Customers';
 import { QuoteHistory } from './components/QuoteHistory';
 import { Settings } from './components/Settings';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import RecurringInvoices from './components/RecurringInvoices';
+
+import Analytics from './components/Analytics';
+import UserRoles from './components/UserRoles';
+import CurrencyManager from './components/CurrencyManager';
 import { getCurrentUser, signIn, signUp } from './lib/supabase';
+import { SettingsProvider } from './context/SettingsProvider';
+import { TerminologyProvider } from './context/TerminologyProvider';
+
 import { User } from '@supabase/supabase-js';
 import { LogIn, UserPlus, Mail, Lock } from 'lucide-react';
 
-type Page = 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings';
+type Page = 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings' | 'analytics' | 'recurring' | 'roles' | 'currency' | 'reports';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -21,13 +30,14 @@ function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
+
   useEffect(() => {
     const checkUser = async () => {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
-      } catch (error) {
-        console.error('Error checking user:', error);
+      } catch (err) {
+        console.error('Error checking user:', err);
       } finally {
         setLoading(false);
       }
@@ -57,7 +67,7 @@ function App() {
         setUser(result.data.user);
         setFormData({ email: '', password: '' });
       }
-    } catch (error) {
+    } catch {
       setAuthError('An unexpected error occurred');
     } finally {
       setAuthLoading(false);
@@ -174,8 +184,18 @@ function App() {
         return <CreateQuote />;
       case 'invoices':
         return <Invoices />;
+      case 'recurring':
+        return <RecurringInvoices />;
       case 'customers':
         return <Customers />;
+      case 'analytics':
+        return <AnalyticsDashboard />;
+      case 'reports':
+        return <Analytics />;
+      case 'roles':
+        return <UserRoles />;
+      case 'currency':
+        return <CurrencyManager />;
       case 'history':
         return <QuoteHistory />;
       case 'settings':
@@ -186,10 +206,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-      {renderCurrentPage()}
-    </div>
+    <SettingsProvider>
+      <TerminologyProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+
+          {renderCurrentPage()}
+        </div>
+      </TerminologyProvider>
+    </SettingsProvider>
   );
 }
 

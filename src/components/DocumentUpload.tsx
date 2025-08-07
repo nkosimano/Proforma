@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, X, Zap, Brain } from 'lucide-react';
+import { Upload, FileText, AlertCircle, X, Zap, Brain } from 'lucide-react';
 import { DocumentProcessor, ExtractedQuoteData } from '../services/documentProcessor';
 
 interface DocumentUploadProps {

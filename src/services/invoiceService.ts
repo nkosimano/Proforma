@@ -78,7 +78,7 @@ export const createInvoiceFromQuote = async (quote: Quote): Promise<Invoice | nu
 };
 
 export const updateInvoiceStatus = async (id: string, status: Invoice['status'], paidDate?: string): Promise<boolean> => {
-  const updateData: any = { 
+  const updateData: { status: Invoice['status']; updated_at: string; paid_date?: string } = { 
     status, 
     updated_at: new Date().toISOString() 
   };

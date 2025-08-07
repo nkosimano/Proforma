@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Minus, Save, Download, User, Building, FileText, Hash, Receipt, ArrowLeft, GripVertical, Eye } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Save, User, Building, FileText, ArrowLeft, Eye } from 'lucide-react';
+
 import { getAppSettings, saveQuote, incrementQuoteNumber, updateQuote } from '../services/quoteService';
 import { getCompanyProfile } from '../services/companyService';
 import { searchCustomers, CustomerSuggestion } from '../services/customerService';
-import { pdfTemplates } from './PDFTemplateSelector';
+import { pdfTemplates } from '../constants/pdfTemplates';
 import { PDFGenerator, PDFGenerationResult } from '../utils/pdfGenerator';
 import { PDFPreviewModal } from './PDFPreviewModal';
 import { FileSystemUtils } from '../utils/fileSystemUtils';
+import { getProfessionComponent, type ProfessionType } from './professions/componentMap';
 import type { AppSettings, CompanyProfile, LineItem, ClientDetails, QuoteTotals, Quote } from '../types';
 
 interface CreateQuoteProps {
@@ -90,9 +91,9 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   // Update terms when tax setting changes
   useEffect(() => {
     if (!editingQuote && settings && !settings.terms_and_conditions) {
-      setCustomTerms(customTerms.replace(/include 15% VAT|exclude VAT/, includeTax ? 'include 15% VAT' : 'exclude VAT'));
+      setCustomTerms(prevTerms => prevTerms.replace(/include 15% VAT|exclude VAT/, includeTax ? 'include 15% VAT' : 'exclude VAT'));
     }
-  }, [includeTax, editingQuote, settings, customTerms]);
+  }, [includeTax, editingQuote, settings]);
 
   const handleClientNameChange = async (value: string) => {
     setClientDetails({ ...clientDetails, name: value });
@@ -124,9 +125,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     setCustomerSuggestions([]);
   };
 
-  const calculateLineTotal = (quantity: number, unitPrice: number): number => {
-    return quantity * unitPrice;
-  };
+
 
   const calculateTotals = (items = lineItems): QuoteTotals => {
     const validItems = items.filter(item => 
@@ -138,42 +137,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     return { subtotal, vat, total };
   };
 
-  const addLineItem = () => {
-    const newId = (lineItems.length + 1).toString();
-    setLineItems([...lineItems, { id: newId, description: '', quantity: 1, unit_price: 0, line_total: 0 }]);
-  };
 
-  const removeLineItem = (id: string) => {
-    if (lineItems.length > 1) {
-      setLineItems(lineItems.filter(item => item.id !== id));
-    }
-  };
-
-  const updateLineItem = (id: string, field: keyof LineItem, value: string | number) => {
-    setLineItems(lineItems.map(item => {
-      if (item.id === id) {
-        const updatedItem = { ...item, [field]: value };
-        if (field === 'quantity' || field === 'unit_price') {
-          updatedItem.line_total = calculateLineTotal(
-            field === 'quantity' ? Number(value) : updatedItem.quantity,
-            field === 'unit_price' ? Number(value) : updatedItem.unit_price
-          );
-        }
-        return updatedItem;
-      }
-      return item;
-    }));
-  };
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(lineItems);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    setLineItems(items);
-  };
 
   const handleSaveQuote = async () => {
     if (!settings || !companyProfile) {
@@ -186,18 +150,12 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
       return;
     }
 
-    // Filter out completely empty line items (no description and zero values)
-    const validLineItems = lineItems.filter(item => 
-      item.description.trim() !== '' || item.quantity > 0 || item.unit_price > 0
-    );
-
-
     setSaving(true);
     setMessage(null);
 
     try {
       const currentQuoteNumber = editingQuote ? editingQuote.quote_number : `${settings.quote_prefix}${settings.next_quote_number}`;
-      const totals = calculateTotals(validLineItems);
+      const totals = calculateTotals(lineItems);
 
       const quote = {
         quote_number: currentQuoteNumber,
@@ -205,7 +163,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
           ...clientDetails,
           comments: comments,
         } as ClientDetails,
-        line_items: validLineItems,
+        line_items: lineItems,
         totals,
       };
 
@@ -259,16 +217,14 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
       console.log('Generate PDF clicked');
       const selectedTemplate = pdfTemplates.find(t => t.id === settings.pdf_template) || pdfTemplates[0];
       const currentQuoteNumber = editingQuote ? editingQuote.quote_number : quoteNumber;
-      const validLineItems = lineItems.filter(item => 
-        item.description.trim() !== ''
-      );
-      const totals = calculateTotals(validLineItems);
+      const totals = calculateTotals(lineItems);
 
       // Prepare data for PDF generation
       const pdfData = {
         quoteNumber: currentQuoteNumber,
         date: new Date().toLocaleDateString('en-ZA'),
         validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-ZA'),
+        profession: settings?.profession || 'General',
         companyProfile,
         clientDetails: {
           name: clientDetails.name,
@@ -276,7 +232,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
           email: clientDetails.email,
           comments: comments
         },
-        lineItems: validLineItems,
+        lineItems: lineItems,
         totals,
         terms: customTerms,
         colors: {
@@ -363,9 +319,6 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   }
 
   const totals = calculateTotals();
-  const validLineItems = lineItems.filter(item => 
-    item.description.trim() !== '' || item.quantity > 0 || item.unit_price > 0
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -512,107 +465,24 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
 
             {/* Line Items Section */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Line Items</h3>
-                <button
-                  onClick={addLineItem}
-                  className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Item
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="line-items">
-                    {(provided) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
-                        {lineItems.map((item, index) => (
-                          <Draggable key={item.id} draggableId={item.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className={`grid grid-cols-12 gap-4 items-end p-4 bg-white border border-gray-200 rounded-lg transition-all ${
-                                  snapshot.isDragging ? 'shadow-lg border-blue-300 bg-blue-50' : 'hover:border-gray-300'
-                                }`}
-                              >
-                                <div className="col-span-1 flex items-center justify-center">
-                                  <div
-                                    {...provided.dragHandleProps}
-                                    className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors"
-                                  >
-                                    <GripVertical className="h-5 w-5" />
-                                  </div>
-                                </div>
-                                <div className="col-span-4">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={item.description}
-                                    onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Item description"
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Quantity
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    value={item.quantity}
-                                    onChange={(e) => updateLineItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                                   onFocus={(e) => e.stopPropagation()}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Unit Price (R)
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={item.unit_price}
-                                    onChange={(e) => updateLineItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
-                                   onFocus={(e) => e.stopPropagation()}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Total
-                                  </label>
-                                  <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-right">
-                                    R{item.line_total.toFixed(2)}
-                                  </div>
-                                </div>
-                                <div className="col-span-1">
-                                  {lineItems.length > 1 && (
-                                    <button
-                                      onClick={() => removeLineItem(item.id)}
-                                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    >
-                                      <Minus className="h-4 w-4" />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </div>
+              <Suspense fallback={
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-2 text-gray-600">Loading profession-specific components...</span>
+                </div>
+              }>
+                {(() => {
+                   const professionType = (settings?.profession as ProfessionType) || 'General';
+                   const ProfessionComponent = getProfessionComponent(professionType);
+                   
+                   return (
+                     <ProfessionComponent
+                       items={lineItems}
+                       onItemsChange={setLineItems}
+                     />
+                   );
+                 })()} 
+              </Suspense>
             </div>
 
             {/* Comments Section */}

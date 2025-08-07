@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Receipt, Plus, Eye, Download, Calendar, DollarSign, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Receipt, Eye, Download, DollarSign, CheckCircle, XCircle, Clock, AlertCircle, CreditCard } from 'lucide-react';
 import { getInvoices, updateInvoiceStatus } from '../services/invoiceService';
 import { getCompanyProfile } from '../services/companyService';
 import { getAppSettings } from '../services/quoteService';
-import { pdfTemplates } from './PDFTemplateSelector';
+import { pdfTemplates } from '../constants/pdfTemplates';
 import { PDFGenerator } from '../utils/pdfGenerator';
+import PaymentModal from './PaymentModal';
+import PaymentHistory from './PaymentHistory';
 import type { Invoice, CompanyProfile, AppSettings } from '../types';
 
 export const Invoices: React.FC = () => {
@@ -14,6 +16,8 @@ export const Invoices: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -413,11 +417,25 @@ export const Invoices: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Payment History Section */}
+                {showPaymentHistory && (
+                  <div className="mt-6 border-t pt-6">
+                    <PaymentHistory invoiceId={selectedInvoice.id} />
+                  </div>
+                )}
+
                 {/* Modal Actions */}
                 <div className="mt-6 flex justify-between">
                   <div className="flex space-x-2">
                     {selectedInvoice.status !== 'paid' && (
                       <>
+                        <button
+                          onClick={() => setShowPaymentModal(true)}
+                          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Pay Now
+                        </button>
                         <button
                           onClick={() => handleStatusUpdate(selectedInvoice.id!, 'sent')}
                           disabled={updatingStatus === selectedInvoice.id}
@@ -428,16 +446,26 @@ export const Invoices: React.FC = () => {
                         <button
                           onClick={() => handleStatusUpdate(selectedInvoice.id!, 'paid')}
                           disabled={updatingStatus === selectedInvoice.id}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
                         >
                           Mark as Paid
                         </button>
                       </>
                     )}
+                    <button
+                      onClick={() => setShowPaymentHistory(!showPaymentHistory)}
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      {showPaymentHistory ? 'Hide' : 'Show'} Payment History
+                    </button>
                   </div>
                   <div className="flex space-x-4">
                     <button
-                      onClick={() => setSelectedInvoice(null)}
+                      onClick={() => {
+                        setSelectedInvoice(null);
+                        setShowPaymentHistory(false);
+                      }}
                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Close
@@ -454,6 +482,21 @@ export const Invoices: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Payment Modal */}
+        {showPaymentModal && selectedInvoice && (
+          <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            invoice={selectedInvoice}
+            onPaymentSuccess={() => {
+              setShowPaymentModal(false);
+              refreshInvoices(); // Refresh invoices list
+              // Update selected invoice status
+              setSelectedInvoice(prev => prev ? { ...prev, status: 'paid' } : null);
+            }}
+          />
         )}
       </div>
     </div>

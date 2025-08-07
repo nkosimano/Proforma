@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
+// import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +11,18 @@ interface TextractResponse {
     BlockType: string;
     Text?: string;
     Confidence?: number;
-    Geometry?: any;
+    Geometry?: {
+      BoundingBox?: {
+        Width: number;
+        Height: number;
+        Left: number;
+        Top: number;
+      };
+      Polygon?: Array<{
+        X: number;
+        Y: number;
+      }>;
+    };
     Relationships?: Array<{
       Type: string;
       Ids: string[];
@@ -87,7 +98,7 @@ function parseTextractResponse(textractData: TextractResponse): ExtractedData {
   const textBlocks = blocks.filter(block => block.BlockType === 'LINE' && block.Text);
   const allText = textBlocks.map(block => block.Text).join('\n');
 
-  let extractedData: ExtractedData = {
+  const extractedData: ExtractedData = {
     line_items: [],
     confidence: 0.8
   };
@@ -202,7 +213,7 @@ function parseTextractResponse(textractData: TextractResponse): ExtractedData {
   }
 
   // Extract date
-  const dateRegex = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/;
+  const dateRegex = /(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/;
   const dateMatch = allText.match(dateRegex);
   if (dateMatch) {
     extractedData.date = dateMatch[1];

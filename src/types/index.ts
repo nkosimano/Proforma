@@ -1,5 +1,8 @@
 import { Tables, TablesInsert, TablesUpdate } from './database';
 
+// Profession types
+export type ProfessionType = 'General' | 'Medical' | 'Legal' | 'Accounting' | 'Engineering';
+
 // Database types from Supabase
 export type Customer = Tables<'customers'>;
 export type CustomerInsert = TablesInsert<'customers'>;
@@ -57,4 +60,5 @@ export interface AppSettings {
   terms_and_conditions: string;
   pdf_template: string;
   user_id: string;
+  profession: ProfessionType;
 }

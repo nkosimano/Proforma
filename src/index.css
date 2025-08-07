@@ -1,3 +1,118 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Profession-based theme classes with gradients */
+.theme-general {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --bg-primary: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  --bg-secondary: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  --bg-accent: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+.theme-medical {
+  --primary-color: #059669;
+  --primary-hover: #047857;
+  --primary-light: #d1fae5;
+  --bg-primary: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  --bg-secondary: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+  --bg-accent: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%);
+}
+
+.theme-legal {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #e0e7ff;
+  --bg-primary: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+  --bg-secondary: linear-gradient(135deg, #d8b4fe 0%, #c084fc 100%);
+  --bg-accent: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+}
+
+.theme-accounting {
+  --primary-color: #d97706;
+  --primary-hover: #b45309;
+  --primary-light: #fef3c7;
+  --bg-primary: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  --bg-secondary: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+  --bg-accent: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+}
+
+.theme-engineering {
+  --primary-color: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-light: #ede9fe;
+  --bg-primary: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+  --bg-secondary: linear-gradient(135deg, #d8b4fe 0%, #c084fc 100%);
+  --bg-accent: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+}
+
+/* Apply theme colors to elements */
+.theme-general .bg-blue-600,
+.theme-medical .bg-blue-600,
+.theme-legal .bg-blue-600,
+.theme-accounting .bg-blue-600,
+.theme-engineering .bg-blue-600 {
+  background-color: var(--primary-color) !important;
+}
+
+.theme-general .hover\:bg-blue-700:hover,
+.theme-medical .hover\:bg-blue-700:hover,
+.theme-legal .hover\:bg-blue-700:hover,
+.theme-accounting .hover\:bg-blue-700:hover,
+.theme-engineering .hover\:bg-blue-700:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+.theme-general .text-blue-600,
+.theme-medical .text-blue-600,
+.theme-legal .text-blue-600,
+.theme-accounting .text-blue-600,
+.theme-engineering .text-blue-600 {
+  color: var(--primary-color) !important;
+}
+
+.theme-general .border-blue-500,
+.theme-medical .border-blue-500,
+.theme-legal .border-blue-500,
+.theme-accounting .border-blue-500,
+.theme-engineering .border-blue-500 {
+  border-color: var(--primary-color) !important;
+}
+
+.theme-general .bg-blue-50,
+.theme-medical .bg-blue-50,
+.theme-legal .bg-blue-50,
+.theme-accounting .bg-blue-50,
+.theme-engineering .bg-blue-50 {
+  background-color: var(--primary-light) !important;
+}
+
+/* Apply profession-specific gradient backgrounds */
+.theme-general,
+.theme-medical,
+.theme-legal,
+.theme-accounting,
+.theme-engineering {
+  background: var(--bg-primary) !important;
+  min-height: 100vh;
+}
+
+/* Secondary gradient background areas */
+.theme-general .bg-gray-50,
+.theme-medical .bg-gray-50,
+.theme-legal .bg-gray-50,
+.theme-accounting .bg-gray-50,
+.theme-engineering .bg-gray-50 {
+  background: var(--bg-secondary) !important;
+}
+
+/* Accent gradient background areas */
+.theme-general .bg-gray-100,
+.theme-medical .bg-gray-100,
+.theme-legal .bg-gray-100,
+.theme-accounting .bg-gray-100,
+.theme-engineering .bg-gray-100 {
+  background: var(--bg-accent) !important;
+}

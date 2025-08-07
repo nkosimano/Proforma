@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Save, X, User, Mail, MapPin, Phone } from 'lucide-react';
-import { getAllCustomers, createCustomer, updateCustomer, deleteCustomer, getCustomerById } from '../services/customerService';
+import { getAllCustomers, createCustomer, updateCustomer, deleteCustomer } from '../services/customerService';
 import type { Customer } from '../types';
 
 interface CustomerFormData {

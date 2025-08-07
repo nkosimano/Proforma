@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Settings, Building, Eye, Download, Edit, Upload, CheckCircle, XCircle, ArrowRight, Brain } from 'lucide-react';
+import { FileText, Plus, Settings, Building, Eye, Edit, Upload, CheckCircle, XCircle, ArrowRight, Brain } from 'lucide-react';
 import { getQuotes, importQuotes, updateQuoteStatus } from '../services/quoteService';
 import { createInvoiceFromQuote } from '../services/invoiceService';
 import { getCompanyProfile } from '../services/companyService';
-import { pdfTemplates } from './PDFTemplateSelector';
+import { pdfTemplates } from '../constants/pdfTemplates';
 import { DocumentUpload } from './DocumentUpload';
 import { DataConfirmation } from './DataConfirmation';
 import { PDFGenerator, PDFGenerationResult } from '../utils/pdfGenerator';
@@ -83,6 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         quoteNumber: quote.quote_number,
         date: new Date(quote.created_at!).toLocaleDateString('en-ZA'),
         validUntil: new Date(new Date(quote.created_at!).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-ZA'),
+        profession: settings?.profession || 'General',
         companyProfile,
         clientDetails: {
           name: quote.client_details.name,
@@ -228,9 +229,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   };
 
   const handleConfirmExtractedData = async (confirmedData: {
-    clientDetails: any;
-    lineItems: any[];
-    totals: any;
+    clientDetails: {
+      name: string;
+      address: string;
+      email: string;
+      comments?: string;
+    };
+    lineItems: {
+      id: string;
+      description: string;
+      quantity: number;
+      unit_price: number;
+      line_total: number;
+    }[];
+    totals: {
+      subtotal: number;
+      vat: number;
+      total: number;
+    };
     comments: string;
   }) => {
     // Convert to quote format and save

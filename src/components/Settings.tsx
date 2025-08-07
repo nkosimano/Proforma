@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Settings as SettingsIcon, Building, Upload, X } from 'lucide-react';
-import { getAppSettings, upsertAppSettings } from '../services/quoteService';
 import { getCompanyProfile, createCompanyProfile, updateCompanyProfile, uploadLogo } from '../services/companyService';
 import { PDFTemplateSelector } from './PDFTemplateSelector';
-import type { AppSettings, CompanyProfile } from '../types';
+import { ProfessionIcon } from './ProfessionIcon';
+import type { CompanyProfile } from '../types';
+import { useSettings } from '../context/SettingsProvider';
+import { PROFESSION_OPTIONS, ProfessionType } from '../constants/professions';
 
 export const Settings: React.FC = () => {
-  const [settings, setSettings] = useState<Omit<AppSettings, 'id' | 'user_id'>>({
-    quote_prefix: 'QU-',
-    next_quote_number: 1001,
-    invoice_prefix: 'INV-',
-    next_invoice_number: 2025001,
-    terms_and_conditions: '',
-    pdf_template: 'classic-blue',
-  });
+  const { settings, updateSettings, updateProfession, loading: settingsLoading } = useSettings();
   const [companyProfile, setCompanyProfile] = useState<Omit<CompanyProfile, 'id' | 'user_id'>>({
     company_name: '',
     address: '',
@@ -23,28 +18,14 @@ export const Settings: React.FC = () => {
     tax_number: '',
   });
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    const loadSettings = async () => {
+    const loadCompanyProfile = async () => {
       try {
-        const [data, profileData] = await Promise.all([
-          getAppSettings(),
-          getCompanyProfile(),
-        ]);
-        if (data) {
-          setSettings({
-            quote_prefix: data.quote_prefix,
-            next_quote_number: data.next_quote_number,
-            invoice_prefix: data.invoice_prefix,
-            next_invoice_number: data.next_invoice_number,
-            terms_and_conditions: data.terms_and_conditions || '',
-            pdf_template: data.pdf_template || 'classic-blue',
-          });
-        }
+        const profileData = await getCompanyProfile();
         if (profileData) {
           setCompanyProfile({
             company_name: profileData.company_name,
@@ -58,14 +39,12 @@ export const Settings: React.FC = () => {
           setExistingProfileId(profileData.id);
         }
       } catch (error) {
-        console.error('Error loading settings:', error);
-        setMessage({ type: 'error', text: 'Failed to load settings' });
-      } finally {
-        setLoading(false);
+        console.error('Error loading company profile:', error);
+        setMessage({ type: 'error', text: 'Failed to load company profile' });
       }
     };
 
-    loadSettings();
+    loadCompanyProfile();
   }, []);
 
   const handleSaveSettings = async () => {
@@ -73,13 +52,9 @@ export const Settings: React.FC = () => {
     setMessage(null);
 
     try {
-      const result = await upsertAppSettings(settings);
-      if (result) {
-        setMessage({ type: 'success', text: 'Settings saved successfully!' });
-        setTimeout(() => setMessage(null), 3000);
-      } else {
-        setMessage({ type: 'error', text: 'Failed to save settings' });
-      }
+      // Settings are automatically saved through the context
+      setMessage({ type: 'success', text: 'Settings saved successfully!' });
+      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       console.error('Error saving settings:', error);
       setMessage({ type: 'error', text: 'Failed to save settings' });
@@ -116,8 +91,20 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: keyof typeof settings, value: string | number) => {
-    setSettings({ ...settings, [field]: value });
+  const handleInputChange = async (field: keyof typeof settings, value: string | number) => {
+    try {
+      if (field === 'profession') {
+        // Use the specific updateProfession method for profession changes
+        await updateProfession(value as ProfessionType);
+        setMessage({ type: 'success', text: 'Profession updated successfully!' });
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        await updateSettings({ [field]: value });
+      }
+    } catch (error) {
+      console.error(`Error updating ${field}:`, error);
+      setMessage({ type: 'error', text: `Failed to update ${field}` });
+    }
   };
 
   const handleCompanyInputChange = (field: keyof typeof companyProfile, value: string) => {
@@ -164,7 +151,7 @@ export const Settings: React.FC = () => {
     setCompanyProfile({ ...companyProfile, logo_url: '' });
   };
 
-  if (loading) {
+  if (settingsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -174,7 +161,7 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
           <p className="mt-2 text-gray-600">Configure your company profile and document numbering preferences</p>
@@ -188,31 +175,35 @@ export const Settings: React.FC = () => {
           </div>
         )}
 
-        {/* Company Profile Section */}
-        <div className="bg-white shadow-sm rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center">
-              <Building className="h-6 w-6 text-blue-600 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-900">Company Profile</h2>
-            </div>
-            <p className="mt-2 text-gray-600">
-              Set up your company information for quotes and invoices
-            </p>
-          </div>
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Company Profile Section */}
+            <div className="bg-white shadow-sm rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Building className="h-6 w-6 text-blue-600 mr-2" />
+                  <h2 className="text-xl font-semibold text-gray-900">Company Profile</h2>
+                </div>
+                <p className="mt-2 text-gray-600">
+                  Set up your company information for quotes and invoices
+                </p>
+              </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Logo
-                </label>
-                <div className="flex items-center space-x-4">
-                  {companyProfile.logo_url ? (
-                    <div className="relative">
-                      <img
-                        src={companyProfile.logo_url}
-                        alt="Company Logo"
-                        className="h-16 w-16 object-contain border border-gray-300 rounded-lg"
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Logo
+                    </label>
+                    <div className="flex items-center space-x-4">
+                      {companyProfile.logo_url ? (
+                        <div className="relative">
+                          <img
+                            src={companyProfile.logo_url}
+                            alt="Company Logo"
+                            className="h-16 w-16 object-contain border border-gray-300 rounded-lg"
                       />
                       <button
                         onClick={handleRemoveLogo}
@@ -324,34 +315,75 @@ export const Settings: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSaveCompanyProfile}
-                  disabled={saving || logoUploading || !companyProfile.company_name || !companyProfile.email || !companyProfile.address}
-                  className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors"
-                >
-                  <Save className="h-5 w-5 mr-2" />
-                  {saving || logoUploading ? 'Saving...' : 'Save Company Profile'}
-                </button>
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleSaveCompanyProfile}
+                      disabled={saving || logoUploading || !companyProfile.company_name || !companyProfile.email || !companyProfile.address}
+                      className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors"
+                    >
+                      <Save className="h-5 w-5 mr-2" />
+                      {saving || logoUploading ? 'Saving...' : 'Save Company Profile'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Profession Settings Section */}
+            <div className="bg-white shadow-sm rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <ProfessionIcon 
+                    profession={settings.profession} 
+                    className="h-6 w-6 text-blue-600 mr-2" 
+                  />
+                  <h2 className="text-xl font-semibold text-gray-900">Profession Settings</h2>
+                </div>
+                <p className="mt-2 text-gray-600">
+                  Choose your profession to customize the application theme and features
+                </p>
+              </div>
+
+              <div className="p-6">
+                <div className="max-w-md">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profession Type
+                  </label>
+                  <select
+                    value={settings.profession}
+                    onChange={(e) => handleInputChange('profession', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {PROFESSION_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-sm text-gray-500">
+                    This affects the application's color theme and specialized features
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Document Numbering Section */}
-        <div className="bg-white shadow-sm rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center">
-              <SettingsIcon className="h-6 w-6 text-blue-600 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-900">Document Numbering</h2>
-            </div>
-            <p className="mt-2 text-gray-600">
-              Configure automatic numbering for your quotes and invoices
-            </p>
-          </div>
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Document Numbering Section */}
+            <div className="bg-white shadow-sm rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <SettingsIcon className="h-6 w-6 text-blue-600 mr-2" />
+                  <h2 className="text-xl font-semibold text-gray-900">Document Numbering</h2>
+                </div>
+                <p className="mt-2 text-gray-600">
+                  Configure automatic numbering for your quotes and invoices
+                </p>
+              </div>
 
-          <div className="p-6">
+              <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Quote Settings */}
               <div className="space-y-4">
@@ -447,38 +479,40 @@ export const Settings: React.FC = () => {
               <p className="mt-2 text-sm text-gray-500">These terms will be used as default for new quotes (can be customized per quote)</p>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSaveSettings}
-                  disabled={saving}
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
-                >
-                  <Save className="h-5 w-5 mr-2" />
-                  {saving ? 'Saving...' : 'Save Settings'}
-                </button>
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleSaveSettings}
+                      disabled={saving}
+                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                    >
+                      <Save className="h-5 w-5 mr-2" />
+                      {saving ? 'Saving...' : 'Save Settings'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* PDF Template Section */}
+            <div className="bg-white shadow-sm rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900">PDF Appearance</h2>
+                <p className="mt-2 text-gray-600">
+                  Customize the color theme of your PDF quotes to match your brand
+                </p>
+              </div>
+              <div className="p-6">
+                <PDFTemplateSelector
+                  selectedTemplate={settings.pdf_template}
+                  onTemplateChange={(templateId) => handleInputChange('pdf_template', templateId)}
+                />
+              </div>
+            </div>
+           </div>
         </div>
 
-        {/* PDF Template Section */}
-        <div className="bg-white shadow-sm rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">PDF Appearance</h2>
-            <p className="mt-2 text-gray-600">
-              Customize the color theme of your PDF quotes to match your brand
-            </p>
-          </div>
-          <div className="p-6">
-            <PDFTemplateSelector
-              selectedTemplate={settings.pdf_template}
-              onTemplateChange={(templateId) => handleInputChange('pdf_template', templateId)}
-            />
-          </div>
-        </div>
-
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-800">Important Notes</h3>

@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       customers: {
         Row: {
-          address: string | null
+          address: string
           created_at: string
           email: string
           id: string
@@ -19,9 +19,12 @@ export type Database = {
           phone: string | null
           updated_at: string
           user_id: string
+          currency: string
+          payment_terms: number
+          credit_limit: number | null
         }
         Insert: {
-          address?: string | null
+          address: string
           created_at?: string
           email: string
           id?: string
@@ -29,9 +32,12 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id: string
+          currency?: string
+          payment_terms?: number
+          credit_limit?: number | null
         }
         Update: {
-          address?: string | null
+          address?: string
           created_at?: string
           email?: string
           id?: string
@@ -39,13 +45,24 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+          currency?: string
+          payment_terms?: number
+          credit_limit?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customers_currency_fkey"
+            columns: ["currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       invoices: {
         Row: {
           created_at: string
-          customer_id: string
+          customer_id: string | null
           due_date: string | null
           id: string
           invoice_number: string
@@ -57,11 +74,16 @@ export type Database = {
           tax_amount: number
           total: number
           updated_at: string
-          user_id: string
+          client_details: Json
+          totals: Json
+          currency: string
+          recurring_invoice_id: string | null
+          exchange_rate: number
+          paid_date: string | null
         }
         Insert: {
           created_at?: string
-          customer_id: string
+          customer_id?: string | null
           due_date?: string | null
           id?: string
           invoice_number: string
@@ -73,11 +95,16 @@ export type Database = {
           tax_amount: number
           total: number
           updated_at?: string
-          user_id: string
+          client_details: Json
+          totals: Json
+          currency?: string
+          recurring_invoice_id?: string | null
+          exchange_rate?: number
+          paid_date?: string | null
         }
         Update: {
           created_at?: string
-          customer_id?: string
+          customer_id?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string
@@ -89,7 +116,12 @@ export type Database = {
           tax_amount?: number
           total?: number
           updated_at?: string
-          user_id?: string
+          client_details?: Json
+          totals?: Json
+          currency?: string
+          recurring_invoice_id?: string | null
+          exchange_rate?: number
+          paid_date?: string | null
         }
         Relationships: [
           {
@@ -106,61 +138,268 @@ export type Database = {
             referencedRelation: "quotes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_currency_fkey"
+            columns: ["currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "invoices_recurring_invoice_id_fkey"
+            columns: ["recurring_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_invoices"
+            referencedColumns: ["id"]
+          },
         ]
       }
       quotes: {
         Row: {
           created_at: string
-          customer_id: string
           id: string
           items: Json
-          notes: string | null
           quote_number: string
-          status: string
-          subtotal: number
-          tax_amount: number
-          total: number
+          status: string | null
           updated_at: string
-          user_id: string
-          valid_until: string | null
+          client_details: Json
+          totals: Json
+          currency: string
+          exchange_rate: number
         }
         Insert: {
           created_at?: string
-          customer_id: string
           id?: string
           items: Json
-          notes?: string | null
           quote_number: string
-          status?: string
-          subtotal: number
-          tax_amount: number
-          total: number
+          status?: string | null
           updated_at?: string
-          user_id: string
-          valid_until?: string | null
+          client_details: Json
+          totals: Json
+          currency?: string
+          exchange_rate?: number
         }
         Update: {
           created_at?: string
-          customer_id?: string
           id?: string
           items?: Json
-          notes?: string | null
           quote_number?: string
-          status?: string
-          subtotal?: number
-          tax_amount?: number
-          total?: number
+          status?: string | null
           updated_at?: string
-          user_id?: string
-          valid_until?: string | null
+          client_details?: Json
+          totals?: Json
+          currency?: string
+          exchange_rate?: number
         }
         Relationships: [
           {
-            foreignKeyName: "quotes_customer_id_fkey"
+            foreignKeyName: "quotes_currency_fkey"
+            columns: ["currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      currencies: {
+        Row: {
+          code: string
+          name: string
+          symbol: string
+          exchange_rate: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          name: string
+          symbol: string
+          exchange_rate?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          name?: string
+          symbol?: string
+          exchange_rate?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: string
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: string
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: string
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      recurring_invoices: {
+        Row: {
+          id: string
+          customer_id: string
+          template_data: Json
+          frequency: string
+          start_date: string
+          end_date: string | null
+          next_invoice_date: string
+          is_active: boolean
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          template_data: Json
+          frequency: string
+          start_date: string
+          end_date?: string | null
+          next_invoice_date: string
+          is_active?: boolean
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          template_data?: Json
+          frequency?: string
+          start_date?: string
+          end_date?: string | null
+          next_invoice_date?: string
+          is_active?: boolean
+          user_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_invoices_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          id: string
+          invoice_id: string
+          payment_reference: string
+          amount: number
+          currency: string
+          status: string
+          gateway: string
+          gateway_response: Json | null
+          paid_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          payment_reference: string
+          amount: number
+          currency?: string
+          status?: string
+          gateway?: string
+          gateway_response?: Json | null
+          paid_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          invoice_id?: string
+          payment_reference?: string
+          amount?: number
+          currency?: string
+          status?: string
+          gateway?: string
+          gateway_response?: Json | null
+          paid_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_currency_fkey"
+            columns: ["currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      company_settings: {
+        Row: {
+          id: string
+          user_id: string
+          company_name: string
+          primary_currency: string
+          payment_gateway_config: Json
+          email_templates: Json
+          pdf_templates: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          company_name: string
+          primary_currency?: string
+          payment_gateway_config?: Json
+          email_templates?: Json
+          pdf_templates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          company_name?: string
+          primary_currency?: string
+          payment_gateway_config?: Json
+          email_templates?: Json
+          pdf_templates?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_settings_primary_currency_fkey"
+            columns: ["primary_currency"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -169,7 +408,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_first_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_exchange_rates: {
+        Args: {
+          rates: Json
+        }
+        Returns: undefined
+      }
+      generate_recurring_invoice: {
+        Args: {
+          recurring_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
@@ -276,3 +530,22 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+// Additional type exports for the new features
+export type Currency = Tables<'currencies'>
+export type UserRole = Tables<'user_roles'>
+export type RecurringInvoice = Tables<'recurring_invoices'>
+export type Payment = Tables<'payments'>
+export type CompanySettings = Tables<'company_settings'>
+
+// Enhanced existing types
+export type Customer = Tables<'customers'>
+export type Invoice = Tables<'invoices'>
+export type Quote = Tables<'quotes'>
+
+// Enums for better type safety
+export type PaymentStatus = 'pending' | 'successful' | 'failed' | 'cancelled'
+export type UserRoleType = 'admin' | 'user' | 'viewer'
+export type RecurringFrequency = 'weekly' | 'monthly' | 'quarterly' | 'yearly'
+export type InvoiceStatus = 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled'
+export type QuoteStatus = 'draft' | 'pending' | 'accepted' | 'rejected' | 'expired'

@@ -24,7 +24,12 @@ export class FileSystemUtils {
 
     try {
       // Request access to a directory (user will choose Documents folder)
-      const directoryHandle = await (window as any).showDirectoryPicker({
+      const directoryHandle = await (window as Window & {
+        showDirectoryPicker: (options: {
+          mode: 'readwrite';
+          startIn: 'documents';
+        }) => Promise<FileSystemDirectoryHandle>;
+      }).showDirectoryPicker({
         mode: 'readwrite',
         startIn: 'documents'
       });
