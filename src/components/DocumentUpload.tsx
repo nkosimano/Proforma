@@ -50,7 +50,10 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onDataExtracted,
     
     const files = e.dataTransfer.files;
     if (files && files[0]) {
-      handleFile(files[0]);
+      handleFile(files[0]).catch(err => {
+        console.error('File handling error:', err);
+        setError('An error occurred while processing the file');
+      });
     }
   };
 
@@ -69,7 +72,10 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onDataExtracted,
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files[0]) {
-      handleFile(files[0]);
+      handleFile(files[0]).catch(err => {
+        console.error('File handling error:', err);
+        setError('An error occurred while processing the file');
+      });
     }
   };
 

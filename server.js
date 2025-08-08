@@ -32,6 +32,10 @@ app.post('/api/textract/process-document', async (req, res) => {
     }
 
     // Check if AWS credentials are configured
+    console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID ? 'Set' : 'Not set');
+    console.log('AWS_SECRET_ACCESS_KEY:', process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set');
+    console.log('AWS_REGION:', process.env.AWS_REGION);
+    
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
       return res.status(500).json({ error: 'AWS credentials not configured' });
     }

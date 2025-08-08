@@ -2,6 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile viewport and overflow fixes */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  width: 100%;
+  min-width: 320px;
+}
+
+/* Prevent horizontal scroll on mobile */
+.container,
+.max-w-7xl,
+.max-w-6xl,
+.max-w-5xl,
+.max-w-4xl,
+.max-w-3xl,
+.max-w-2xl,
+.max-w-xl,
+.max-w-lg,
+.max-w-md,
+.max-w-sm {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile table fixes */
+@media (max-width: 640px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    min-width: 100%;
+  }
+}
+
+/* Touch target improvements */
+.min-h-touch {
+  min-height: 44px;
+}
+
+.min-w-touch {
+  min-width: 44px;
+}
+
+/* Focus improvements for mobile */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Prevent zoom on input focus on iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Profession-based theme classes with gradients */
 .theme-general {
   --primary-color: #2563eb;

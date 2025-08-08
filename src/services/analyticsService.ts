@@ -220,8 +220,7 @@ export const analyticsService = {
         .select(`
           client_details,
           totals,
-          created_at,
-          customers!inner(name)
+          created_at
         `);
 
       if (!invoices) return [];

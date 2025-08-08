@@ -6,18 +6,17 @@ import { Invoices } from './components/Invoices';
 import { Customers } from './components/Customers';
 import { QuoteHistory } from './components/QuoteHistory';
 import { Settings } from './components/Settings';
+import Analytics from './components/Analytics';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import RecurringInvoices from './components/RecurringInvoices';
-
-import Analytics from './components/Analytics';
 import UserRoles from './components/UserRoles';
 import CurrencyManager from './components/CurrencyManager';
 import { getCurrentUser, signIn, signUp } from './lib/supabase';
 import { SettingsProvider } from './context/SettingsProvider';
 import { TerminologyProvider } from './context/TerminologyProvider';
-
-import { User } from '@supabase/supabase-js';
-import { LogIn, UserPlus, Mail, Lock } from 'lucide-react';
+import ErrorBoundary from './components/ErrorBoundary';
+import { Mail, Lock, LogIn, UserPlus } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 type Page = 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings' | 'analytics' | 'recurring' | 'roles' | 'currency' | 'reports';
 
@@ -206,15 +205,17 @@ function App() {
   };
 
   return (
-    <SettingsProvider>
-      <TerminologyProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+    <ErrorBoundary>
+      <SettingsProvider>
+        <TerminologyProvider>
+          <div className="min-h-screen bg-gray-50">
+            <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
 
-          {renderCurrentPage()}
-        </div>
-      </TerminologyProvider>
-    </SettingsProvider>
+            {renderCurrentPage()}
+          </div>
+        </TerminologyProvider>
+      </SettingsProvider>
+    </ErrorBoundary>
   );
 }
 

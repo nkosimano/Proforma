@@ -170,7 +170,9 @@ const Analytics: React.FC<AnalyticsProps> = ({ className = '' }) => {
   }, [dateRange, processAnalyticsData]);
 
   useEffect(() => {
-    loadAnalyticsData();
+    loadAnalyticsData().catch(err => {
+      console.error('Error in loadAnalyticsData useEffect:', err);
+    });
   }, [loadAnalyticsData]);
 
 

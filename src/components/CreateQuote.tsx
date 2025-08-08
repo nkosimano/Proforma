@@ -89,11 +89,12 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   }, []);
 
   // Update terms when tax setting changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!editingQuote && settings && !settings.terms_and_conditions) {
       setCustomTerms(prevTerms => prevTerms.replace(/include 15% VAT|exclude VAT/, includeTax ? 'include 15% VAT' : 'exclude VAT'));
     }
-  }, [includeTax, editingQuote, settings]);
+  }, [includeTax]);
 
   const handleClientNameChange = async (value: string) => {
     setClientDetails({ ...clientDetails, name: value });
@@ -321,24 +322,24 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   const totals = calculateTotals();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center mb-3 sm:mb-4">
             {editingQuote && onBack && (
-              <button onClick={onBack} className="mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors">
-                <ArrowLeft className="h-5 w-5" />
+              <button onClick={onBack} className="mr-3 sm:mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors min-h-touch min-w-touch">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             )}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{editingQuote ? 'Edit Quote' : 'Create Quote'}</h1>
-              <p className="mt-2 text-gray-600">{editingQuote ? 'Update your existing quote' : 'Generate a professional quote for your client'}</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{editingQuote ? 'Edit Quote' : 'Create Quote'}</h1>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">{editingQuote ? 'Update your existing quote' : 'Generate a professional quote for your client'}</p>
             </div>
           </div>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
+          <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg text-sm sm:text-base ${
             message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
           }`}>
             {message.text}
@@ -346,28 +347,28 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
         )}
 
         <div className="bg-white shadow-sm rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-0">
               <div className="flex items-center">
-                <FileText className="h-6 w-6 text-blue-600 mr-2" />
-                <h2 className="text-xl font-semibold text-gray-900">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2" />
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Quote {quoteNumber}
                 </h2>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-xs sm:text-sm text-gray-500">
                 Date: {new Date().toLocaleDateString()}
               </div>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {/* Client Details Section */}
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <User className="h-5 w-5 text-blue-600 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900">Client Details</h3>
+            <div className="mb-6 sm:mb-8">
+              <div className="flex items-center mb-3 sm:mb-4">
+                <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">Client Details</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Client Name *
@@ -386,15 +387,15 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                         // Delay hiding suggestions to allow clicking
                         setTimeout(() => setShowSuggestions(false), 200);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                       placeholder="Enter client name (type 2+ letters for suggestions)"
                     />
                     
                     {/* Customer Suggestions Dropdown */}
                     {showSuggestions && customerSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-y-auto">
                         {searchingCustomers && (
-                          <div className="px-4 py-3 text-sm text-gray-500 flex items-center">
+                          <div className="px-3 sm:px-4 py-2 sm:py-3 text-sm text-gray-500 flex items-center">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
                             Searching customers...
                           </div>
@@ -403,10 +404,10 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                           <div
                             key={index}
                             onClick={() => selectCustomer(customer)}
-                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            className="px-3 sm:px-4 py-2 sm:py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 min-h-touch"
                           >
-                            <div className="font-medium text-gray-900">{customer.name}</div>
-                            <div className="text-sm text-gray-600">{customer.email}</div>
+                            <div className="font-medium text-gray-900 text-sm sm:text-base">{customer.name}</div>
+                            <div className="text-xs sm:text-sm text-gray-600">{customer.email}</div>
                             <div className="text-xs text-gray-500 truncate">{customer.address}</div>
                           </div>
                         ))}
@@ -422,11 +423,11 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                     type="email"
                     value={clientDetails.email}
                     onChange={(e) => setClientDetails({ ...clientDetails, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                     placeholder="Enter client email"
                   />
                 </div>
-                <div className="md:col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Address *
                   </label>
@@ -434,20 +435,20 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                     value={clientDetails.address}
                     onChange={(e) => setClientDetails({ ...clientDetails, address: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                     placeholder="Enter client address"
                   />
                 </div>
               </div>
 
               {/* Tax Settings */}
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 xs:gap-0">
                   <div>
                     <h4 className="text-sm font-medium text-blue-900">VAT/Tax Settings</h4>
-                    <p className="text-sm text-blue-700">Toggle VAT inclusion for new businesses</p>
+                    <p className="text-xs sm:text-sm text-blue-700">Toggle VAT inclusion for new businesses</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                  <label className="relative inline-flex items-center cursor-pointer min-h-touch">
                     <input
                       type="checkbox"
                       checked={includeTax}
@@ -455,7 +456,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span className="ml-3 text-sm font-medium text-gray-700">
+                    <span className="ml-3 text-xs sm:text-sm font-medium text-gray-700">
                       {includeTax ? 'Include VAT (15%)' : 'Exclude VAT'}
                     </span>
                   </label>
@@ -486,7 +487,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
             </div>
 
             {/* Comments Section */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Comments / Notes
               </label>
@@ -495,13 +496,13 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                 onChange={(e) => setComments(e.target.value)}
                onPaste={(e) => e.stopPropagation()}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch text-sm sm:text-base"
                 placeholder="Add any additional comments or terms..."
               />
             </div>
 
             {/* Terms and Conditions Section */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Terms and Conditions
               </label>
@@ -510,26 +511,26 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                 onChange={(e) => setCustomTerms(e.target.value)}
                onPaste={(e) => e.stopPropagation()}
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm min-h-touch"
                 placeholder="Enter your terms and conditions..."
               />
             </div>
 
             {/* Totals Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
               <div className="flex justify-end">
-                <div className="w-80">
-                  <div className="flex justify-between py-2">
+                <div className="w-full sm:w-80">
+                  <div className="flex justify-between py-2 text-sm sm:text-base">
                     <span className="text-gray-700">Subtotal:</span>
                     <span className="font-medium">R{totals.subtotal.toFixed(2)}</span>
                   </div>
                   {includeTax && (
-                    <div className="flex justify-between py-2">
+                    <div className="flex justify-between py-2 text-sm sm:text-base">
                       <span className="text-gray-700">VAT (15%):</span>
                       <span className="font-medium">R{totals.vat.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between py-3 border-t border-gray-300 text-lg font-bold">
+                  <div className="flex justify-between py-3 border-t border-gray-300 text-base sm:text-lg font-bold">
                     <span>Total:</span>
                     <span>R{totals.total.toFixed(2)}</span>
                   </div>
@@ -543,32 +544,39 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex justify-end space-x-4">
+            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+              <div className="flex flex-col xs:flex-row justify-end gap-3 xs:gap-4">
                 <button
                   onClick={generatePDF}
                   disabled={generatingPDF || !clientDetails.name || !clientDetails.address || !clientDetails.email}
-                  className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 transition-colors"
+                  className="inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 transition-colors min-h-touch text-sm sm:text-base"
                 >
                   {generatingPDF ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Generating...
+                      <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+                      <span className="hidden xs:inline">Generating...</span>
+                      <span className="xs:hidden">Generating</span>
                     </>
                   ) : (
                     <>
-                      <Eye className="h-5 w-5 mr-2" />
-                      Preview PDF
+                      <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="hidden xs:inline">Preview PDF</span>
+                      <span className="xs:hidden">Preview</span>
                     </>
                   )}
                 </button>
                 <button
                   onClick={handleSaveQuote}
                   disabled={saving || !clientDetails.name || !clientDetails.address || !clientDetails.email}
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                  className="inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors min-h-touch text-sm sm:text-base"
                 >
-                  <Save className="h-5 w-5 mr-2" />
-                  {saving ? 'Saving...' : (editingQuote ? 'Update Quote' : 'Save Quote')}
+                  <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  {saving ? (
+                    <span className="hidden xs:inline">Saving...</span>
+                  ) : (
+                    <span>{editingQuote ? 'Update Quote' : 'Save Quote'}</span>
+                  )}
+                  {saving && <span className="xs:hidden">Saving</span>}
                 </button>
               </div>
             </div>

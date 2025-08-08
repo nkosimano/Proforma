@@ -165,15 +165,15 @@ export const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-2 text-gray-600">Configure your company profile and document numbering preferences</p>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl xs:text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Configure your company profile and document numbering preferences</p>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
+          <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg text-sm sm:text-base ${
             message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
           }`}>
             {message.text}
@@ -181,30 +181,30 @@ export const Settings: React.FC = () => {
         )}
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Company Profile Section */}
             <div className="bg-white shadow-sm rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <div className="flex items-center">
-                  <Building className="h-6 w-6 text-blue-600 mr-2" />
-                  <h2 className="text-xl font-semibold text-gray-900">Company Profile</h2>
+                  <Building className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2" />
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Company Profile</h2>
                 </div>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                   Set up your company information for quotes and invoices
                 </p>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="sm:col-span-2">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company Logo
                     </label>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex flex-col xs:flex-row xs:items-center gap-3 xs:gap-4">
                       {companyProfile.logo_url ? (
-                        <div className="relative">
+                        <div className="relative flex-shrink-0">
                           <img
                             src={companyProfile.logo_url}
                             alt="Company Logo"
@@ -212,17 +212,17 @@ export const Settings: React.FC = () => {
                       />
                       <button
                         onClick={handleRemoveLogo}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 min-h-touch min-w-touch"
                       >
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                   ) : (
-                    <div className="h-16 w-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                    <div className="h-16 w-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Building className="h-6 w-6 text-gray-400" />
                     </div>
                   )}
-                  <div>
+                  <div className="flex-1">
                     <input
                       type="file"
                       accept="image/*"
@@ -233,7 +233,7 @@ export const Settings: React.FC = () => {
                     />
                     <label
                       htmlFor="logo-upload"
-                      className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer ${
+                      className={`inline-flex items-center justify-center w-full xs:w-auto px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer min-h-touch ${
                         logoUploading ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
@@ -246,89 +246,92 @@ export const Settings: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Name *
-                </label>
-                <input
-                  type="text"
-                  value={companyProfile.company_name}
-                  onChange={(e) => handleCompanyInputChange('company_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your company name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  value={companyProfile.email}
-                  onChange={(e) => handleCompanyInputChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your email address"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Address *
-                </label>
-                <textarea
-                  value={companyProfile.address}
-                  onChange={(e) => handleCompanyInputChange('address', e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                  placeholder="Enter your company address"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={companyProfile.phone}
-                  onChange={(e) => handleCompanyInputChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Company Registration Number
-                </label>
-                <input
-                  type="text"
-                  value={companyProfile.company_registration_number}
-                  onChange={(e) => handleCompanyInputChange('company_registration_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your company registration number"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  VAT/Tax Number
-                </label>
-                <input
-                  type="text"
-                  value={companyProfile.tax_number}
-                  onChange={(e) => handleCompanyInputChange('tax_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter your VAT/tax number"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={companyProfile.company_name}
+                    onChange={(e) => handleCompanyInputChange('company_name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    placeholder="Enter your company name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={companyProfile.email}
+                    onChange={(e) => handleCompanyInputChange('email', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address *
+                  </label>
+                  <textarea
+                    value={companyProfile.address}
+                    onChange={(e) => handleCompanyInputChange('address', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    placeholder="Enter your company address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={companyProfile.phone}
+                    onChange={(e) => handleCompanyInputChange('phone', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Registration Number
+                  </label>
+                  <input
+                    type="text"
+                    value={companyProfile.company_registration_number}
+                    onChange={(e) => handleCompanyInputChange('company_registration_number', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    placeholder="Enter your company registration number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    VAT/Tax Number
+                  </label>
+                  <input
+                    type="text"
+                    value={companyProfile.tax_number}
+                    onChange={(e) => handleCompanyInputChange('tax_number', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    placeholder="Enter your VAT/tax number"
+                  />
+                </div>
               </div>
             </div>
 
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveCompanyProfile}
                       disabled={saving || logoUploading || !companyProfile.company_name || !companyProfile.email || !companyProfile.address}
-                      className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors"
+                      className="inline-flex items-center justify-center w-full xs:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors min-h-touch"
                     >
-                      <Save className="h-5 w-5 mr-2" />
-                      {saving || logoUploading ? 'Saving...' : 'Save Company Profile'}
+                      <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="hidden xs:inline">{saving || logoUploading ? 'Saving...' : 'Save Company Profile'}</span>
+                      <span className="xs:hidden">{saving || logoUploading ? 'Saving...' : 'Save Profile'}</span>
                     </button>
                   </div>
                 </div>
@@ -337,28 +340,28 @@ export const Settings: React.FC = () => {
 
             {/* Profession Settings Section */}
             <div className="bg-white shadow-sm rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <div className="flex items-center">
                   <ProfessionIcon 
                     profession={settings.profession} 
-                    className="h-6 w-6 text-blue-600 mr-2" 
+                    className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2" 
                   />
-                  <h2 className="text-xl font-semibold text-gray-900">Profession Settings</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Profession Settings</h2>
                 </div>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                   Choose your profession to customize the application theme and features
                 </p>
               </div>
 
-              <div className="p-6">
-                <div className="max-w-md">
+              <div className="p-4 sm:p-6">
+                <div className="max-w-full sm:max-w-md">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Profession Type
                   </label>
                   <select
                     value={settings.profession}
                     onChange={(e) => handleInputChange('profession', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                   >
                     {PROFESSION_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -375,24 +378,24 @@ export const Settings: React.FC = () => {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Document Numbering Section */}
             <div className="bg-white shadow-sm rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
                 <div className="flex items-center">
-                  <SettingsIcon className="h-6 w-6 text-blue-600 mr-2" />
-                  <h2 className="text-xl font-semibold text-gray-900">Document Numbering</h2>
+                  <SettingsIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mr-2" />
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Document Numbering</h2>
                 </div>
-                <p className="mt-2 text-gray-600">
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                   Configure automatic numbering for your quotes and invoices
                 </p>
               </div>
 
-              <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 gap-6 sm:gap-8">
               {/* Quote Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Quote Settings</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">Quote Settings</h3>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Quote Prefix
@@ -401,7 +404,7 @@ export const Settings: React.FC = () => {
                     type="text"
                     value={settings.quote_prefix}
                     onChange={(e) => handleInputChange('quote_prefix', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                     placeholder="e.g., QU- or QUOTE-"
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -417,7 +420,7 @@ export const Settings: React.FC = () => {
                     min="1"
                     value={settings.next_quote_number}
                     onChange={(e) => handleInputChange('next_quote_number', parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     The next quote will use this number
@@ -431,8 +434,8 @@ export const Settings: React.FC = () => {
               </div>
 
               {/* Invoice Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Invoice Settings</h3>
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">Invoice Settings</h3>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Invoice Prefix
@@ -441,7 +444,7 @@ export const Settings: React.FC = () => {
                     type="text"
                     value={settings.invoice_prefix}
                     onChange={(e) => handleInputChange('invoice_prefix', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                     placeholder="e.g., INV- or INVOICE-"
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -457,7 +460,7 @@ export const Settings: React.FC = () => {
                     min="1"
                     value={settings.next_invoice_number}
                     onChange={(e) => handleInputChange('next_invoice_number', parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     The next invoice will use this number
@@ -472,8 +475,8 @@ export const Settings: React.FC = () => {
             </div>
 
             {/* Terms and Conditions */}
-            <div className="mt-8">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Default Terms and Conditions</h3>
+            <div className="mt-6 sm:mt-8">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Default Terms and Conditions</h3>
               <textarea
                 value={settings.terms_and_conditions}
                 onChange={(e) => handleInputChange('terms_and_conditions', e.target.value)}
@@ -484,15 +487,16 @@ export const Settings: React.FC = () => {
               <p className="mt-2 text-sm text-gray-500">These terms will be used as default for new quotes (can be customized per quote)</p>
             </div>
 
-                <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
                   <div className="flex justify-end">
                     <button
                       onClick={handleSaveSettings}
                       disabled={saving}
-                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                      className="inline-flex items-center justify-center w-full xs:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors min-h-touch"
                     >
-                      <Save className="h-5 w-5 mr-2" />
-                      {saving ? 'Saving...' : 'Save Settings'}
+                      <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="hidden xs:inline">{saving ? 'Saving...' : 'Save Settings'}</span>
+                      <span className="xs:hidden">{saving ? 'Saving...' : 'Save'}</span>
                     </button>
                   </div>
                 </div>
@@ -501,13 +505,13 @@ export const Settings: React.FC = () => {
 
             {/* PDF Template Section */}
             <div className="bg-white shadow-sm rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">PDF Appearance</h2>
-                <p className="mt-2 text-gray-600">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">PDF Appearance</h2>
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                   Customize the color theme of your PDF quotes to match your brand
                 </p>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <PDFTemplateSelector
                   selectedTemplate={settings.pdf_template}
                   onTemplateChange={(templateId) => handleInputChange('pdf_template', templateId)}
@@ -517,12 +521,12 @@ export const Settings: React.FC = () => {
            </div>
         </div>
 
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mt-6 sm:mt-8 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
           <div className="flex">
-            <div className="ml-3">
+            <div className="ml-2 sm:ml-3">
               <h3 className="text-sm font-medium text-blue-800">Important Notes</h3>
               <div className="mt-2 text-sm text-blue-700">
-                <ul className="list-disc pl-5 space-y-1">
+                <ul className="list-disc pl-4 sm:pl-5 space-y-1">
                   <li>Set up your company profile first to enable quote creation</li>
                   <li>Quote numbers automatically increment when you save a new quote</li>
                   <li>Invoice numbers will increment when you create invoices (future feature)</li>

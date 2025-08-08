@@ -146,7 +146,9 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
 
   // Initial load
   useEffect(() => {
-    fetchSettings();
+    fetchSettings().catch(err => {
+      console.error('Error loading settings:', err);
+    });
   }, []);
 
   // Cleanup theme on unmount

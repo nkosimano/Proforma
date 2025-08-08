@@ -259,14 +259,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Manage your quotes and business settings</p>
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl xs:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Manage your quotes and business settings</p>
 
           {importMessage && (
-            <div className={`mt-4 p-4 rounded-lg ${
+            <div className={`mt-3 sm:mt-4 p-3 sm:p-4 rounded-lg text-sm sm:text-base ${
               importMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
             }`}>
               {importMessage.text}
@@ -275,45 +275,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div
             onClick={() => onNavigate('quote')}
-            className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer min-h-touch active:bg-gray-50"
           >
             <div className="flex items-center">
-              <div className="bg-blue-500 p-3 rounded-lg">
-                <Plus className="h-6 w-6 text-white" />
+              <div className="bg-blue-500 p-2 sm:p-3 rounded-lg flex-shrink-0">
+                <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Create Quote</h3>
-                <p className="text-gray-600">Generate a new customer quote</p>
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">Create Quote</h3>
+                <p className="text-sm sm:text-base text-gray-600 truncate">Generate a new customer quote</p>
               </div>
             </div>
           </div>
 
           <div
             onClick={() => onNavigate('settings')}
-            className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer min-h-touch active:bg-gray-50"
           >
             <div className="flex items-center">
-              <div className="bg-gray-500 p-3 rounded-lg">
-                <Settings className="h-6 w-6 text-white" />
+              <div className="bg-gray-500 p-2 sm:p-3 rounded-lg flex-shrink-0">
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Settings</h3>
-                <p className="text-gray-600">Configure numbering and preferences</p>
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">Settings</h3>
+                <p className="text-sm sm:text-base text-gray-600 truncate">Configure numbering and preferences</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center">
-              <div className="bg-green-500 p-3 rounded-lg">
-                <Building className="h-6 w-6 text-white" />
+              <div className="bg-green-500 p-2 sm:p-3 rounded-lg flex-shrink-0">
+                <Building className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Company Profile</h3>
-                <p className="text-gray-600">
+              <div className="ml-3 sm:ml-4 min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">Company Profile</h3>
+                <p className="text-sm sm:text-base text-gray-600 truncate">
                   {companyProfile ? companyProfile.company_name : 'Not configured'}
                 </p>
               </div>
@@ -323,39 +323,125 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         {/* Recent Quotes */}
         <div className="bg-white shadow-sm rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Recent Quotes</h2>
-              <div className="flex items-center space-x-4">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 xs:gap-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Quotes</h2>
+              <div className="flex items-center justify-between xs:justify-end space-x-3 sm:space-x-4">
                 <button
                   onClick={() => setShowDocumentUpload(true)}
-                  className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm min-h-touch min-w-touch"
                 >
-                  <Brain className="h-4 w-4 mr-2" />
-                  AI Import
+                  <Brain className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">AI Import</span>
+                  <span className="xs:hidden">Import</span>
                 </button>
 
-                <span className="text-sm text-gray-500">{quotes.length} total</span>
+                <span className="text-xs sm:text-sm text-gray-500">{quotes.length} total</span>
               </div>
             </div>
           </div>
           <div className="divide-y divide-gray-200">
             {quotes.length === 0 ? (
-              <div className="px-6 py-12 text-center">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No quotes yet</h3>
-                <p className="text-gray-600 mb-6">Get started by creating your first quote</p>
+              <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
+                <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No quotes yet</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Get started by creating your first quote</p>
                 <button
                   onClick={() => onNavigate('quote')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors min-h-touch min-w-touch"
                 >
                   Create Quote
                 </button>
               </div>
             ) : (
               quotes.map((quote) => (
-                <div key={quote.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between group">
+                <div key={quote.id} className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50">
+                  {/* Mobile Layout */}
+                  <div className="block sm:hidden">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="text-sm font-medium text-gray-900 truncate">
+                            {quote.quote_number}
+                          </h3>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getQuoteStatusColor(quote.status)}`}>
+                            {getQuoteStatusIcon(quote.status)}
+                            <span className="ml-1 capitalize">{quote.status || 'pending'}</span>
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">
+                          {quote.client_details.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {quote.line_items.length} item{quote.line_items.length !== 1 ? 's' : ''} • {new Date(quote.created_at!).toLocaleDateString('en-ZA')}
+                        </p>
+                      </div>
+                      <div className="text-right ml-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          R {quote.totals.total.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-end space-x-1">
+                      {quote.status === 'pending' && (
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => handleQuoteStatusUpdate(quote.id!, 'approved')}
+                            className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors min-h-touch"
+                            title="Approve Quote"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleQuoteStatusUpdate(quote.id!, 'declined')}
+                            className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors min-h-touch"
+                            title="Decline Quote"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+                      {quote.status === 'approved' && (
+                        <button
+                          onClick={() => handleConvertToInvoice(quote)}
+                          disabled={convertingQuote === quote.id}
+                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors min-h-touch"
+                          title="Convert to Invoice"
+                        >
+                          {convertingQuote === quote.id ? 'Converting...' : 'To Invoice'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleEditQuote(quote)}
+                        className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors min-h-touch min-w-touch"
+                        title="Edit Quote"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setSelectedQuote(quote)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors min-h-touch min-w-touch"
+                        title="View Quote"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => generateQuotePDF(quote)}
+                        disabled={generatingPDF}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 min-h-touch min-w-touch"
+                        title="Preview PDF"
+                      >
+                        {generatingPDF ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between group">
                     <div>
                       <div className="flex items-center space-x-3">
                         <h3 className="text-sm font-medium text-gray-900">
@@ -464,43 +550,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
         {/* Quote Detail Modal */}
         {selectedQuote && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                   Quote Details - {selectedQuote.quote_number}
                 </h2>
                 <button
                   onClick={closeQuoteModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 min-h-touch min-w-touch"
                 >
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
               
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Quote Header */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Client Information</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="font-medium text-gray-900">{selectedQuote.client_details.name}</p>
-                      <p className="text-gray-600 whitespace-pre-line">{selectedQuote.client_details.address}</p>
-                      <p className="text-gray-600">{selectedQuote.client_details.email}</p>
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Client Information</h3>
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base">{selectedQuote.client_details.name}</p>
+                      <p className="text-gray-600 whitespace-pre-line text-sm sm:text-base">{selectedQuote.client_details.address}</p>
+                      <p className="text-gray-600 text-sm sm:text-base">{selectedQuote.client_details.email}</p>
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Quote Information</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-600">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Quote Information</h3>
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         <span className="font-medium">Created:</span> {new Date(selectedQuote.created_at!).toLocaleDateString('en-ZA')}
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         <span className="font-medium">Valid Until:</span> {new Date(new Date(selectedQuote.created_at!).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-ZA')}
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         <span className="font-medium">Items:</span> {selectedQuote.line_items.length}
                       </p>
                     </div>
@@ -508,22 +594,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Line Items */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Line Items</h3>
-                  <div className="overflow-x-auto">
+                <div className="mb-4 sm:mb-6">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Line Items</h3>
+                  
+                  {/* Mobile Card Layout */}
+                  <div className="block sm:hidden space-y-3">
+                    {selectedQuote.line_items.map((item) => (
+                      <div key={item.id} className="bg-gray-50 p-3 rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <p className="text-sm font-medium text-gray-900 flex-1 mr-2">{item.description}</p>
+                          <p className="text-sm font-bold text-gray-900">R {item.line_total.toFixed(2)}</p>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Qty: {item.quantity}</span>
+                          <span>Unit: R {item.unit_price.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Desktop Table Layout */}
+                  <div className="hidden sm:block overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Description
                           </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Qty
                           </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Unit Price
                           </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Total
                           </th>
                         </tr>
@@ -531,16 +635,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {selectedQuote.line_items.map((item) => (
                           <tr key={item.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 sm:px-6 py-4 text-sm text-gray-900">
                               {item.description}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                            <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 text-center">
                               {item.quantity}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 text-right">
                               R {item.unit_price.toFixed(2)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                            <td className="px-4 sm:px-6 py-4 text-sm font-medium text-gray-900 text-right">
                               R {item.line_total.toFixed(2)}
                             </td>
                           </tr>
@@ -552,34 +656,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
                 {/* Comments */}
                 {selectedQuote.client_details.comments && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Comments</h3>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-700 whitespace-pre-line">{selectedQuote.client_details.comments}</p>
+                  <div className="mb-4 sm:mb-6">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">Comments</h3>
+                    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                      <p className="text-gray-700 whitespace-pre-line text-sm sm:text-base">{selectedQuote.client_details.comments}</p>
                     </div>
                   </div>
                 )}
 
                 {/* Totals */}
-                <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
                   <div className="flex justify-end">
-                    <div className="w-80">
-                      <div className="flex justify-between py-2">
-                        <span className="text-gray-700">Subtotal:</span>
-                        <span className="font-medium">R {selectedQuote.totals.subtotal.toFixed(2)}</span>
+                    <div className="w-full sm:w-80">
+                      <div className="flex justify-between py-1 sm:py-2">
+                        <span className="text-gray-700 text-sm sm:text-base">Subtotal:</span>
+                        <span className="font-medium text-sm sm:text-base">R {selectedQuote.totals.subtotal.toFixed(2)}</span>
                       </div>
                       {selectedQuote.totals.vat > 0 && (
-                        <div className="flex justify-between py-2">
-                          <span className="text-gray-700">VAT (15%):</span>
-                          <span className="font-medium">R {selectedQuote.totals.vat.toFixed(2)}</span>
+                        <div className="flex justify-between py-1 sm:py-2">
+                          <span className="text-gray-700 text-sm sm:text-base">VAT (15%):</span>
+                          <span className="font-medium text-sm sm:text-base">R {selectedQuote.totals.vat.toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between py-3 border-t border-gray-300 text-lg font-bold">
+                      <div className="flex justify-between py-2 sm:py-3 border-t border-gray-300 text-base sm:text-lg font-bold">
                         <span>Total:</span>
                         <span>R {selectedQuote.totals.total.toFixed(2)}</span>
                       </div>
                       {selectedQuote.totals.vat === 0 && (
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-gray-500 mt-1 sm:mt-2">
                           * VAT excluded (not VAT registered)
                         </p>
                       )}
@@ -588,27 +692,29 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Modal Actions */}
-                <div className="mt-6 flex justify-end space-x-4">
+                <div className="mt-4 sm:mt-6 flex flex-col xs:flex-row justify-end gap-3 xs:gap-4">
                   <button
                     onClick={closeQuoteModal}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors min-h-touch order-2 xs:order-1"
                   >
                     Close
                   </button>
                   <button
                     onClick={() => generateQuotePDF(selectedQuote)}
                     disabled={generatingPDF}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors min-h-touch order-1 xs:order-2"
                   >
                     {generatingPDF ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Generating...
+                        <span className="hidden xs:inline">Generating...</span>
+                        <span className="xs:hidden">Loading...</span>
                       </>
                     ) : (
                       <>
                         <Eye className="h-4 w-4 mr-2" />
-                        Preview PDF
+                        <span className="hidden xs:inline">Preview PDF</span>
+                        <span className="xs:hidden">Preview</span>
                       </>
                     )}
                   </button>

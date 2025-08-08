@@ -8,6 +8,10 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
+    port: 5173,
+    hmr: {
+      port: 24678
+    },
     proxy: {
       '/api/textract': {
         target: 'http://localhost:3000',

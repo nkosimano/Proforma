@@ -1,9 +1,6 @@
 {
+  "serverless": true,
   "rewrites": [
-    {
-      "source": "/api/textract/(.*)",
-      "destination": "/api/textract/$1"
-    },
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
