@@ -29,6 +29,8 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [currentStep, setCurrentStep] = useState<Step>('client-identification');
   const [clientName, setClientName] = useState('');
   const [selectedClient, setSelectedClient] = useState<Customer | null>(null);
+  const [clientSuggestions, setClientSuggestions] = useState<Customer[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [clientDetails, setClientDetails] = useState({
     name: '',
     surname: '',
@@ -51,6 +53,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [pdfResult, setPdfResult] = useState<PDFGenerationResult | null>(null);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [initializingCurrencies, setInitializingCurrencies] = useState(false);
 
 
   const stepRef = useRef<HTMLDivElement>(null);
@@ -144,11 +147,32 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
 
   const handleClientSearch = (name: string) => {
     setClientName(name);
-    const foundClient = customers.find(c => 
-      c.name.toLowerCase().includes(name.toLowerCase()) ||
-      c.company?.toLowerCase().includes(name.toLowerCase())
-    );
-    setSelectedClient(foundClient || null);
+    
+    if (name.length >= 2) {
+      const matchingClients = customers.filter(c => 
+        c.name.toLowerCase().includes(name.toLowerCase()) ||
+        c.company?.toLowerCase().includes(name.toLowerCase())
+      );
+      setClientSuggestions(matchingClients);
+      setShowSuggestions(matchingClients.length > 0);
+      
+      // Auto-select if exact match
+      const exactMatch = matchingClients.find(c => 
+        c.name.toLowerCase() === name.toLowerCase() ||
+        c.company?.toLowerCase() === name.toLowerCase()
+      );
+      setSelectedClient(exactMatch || null);
+    } else {
+      setClientSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedClient(null);
+    }
+  };
+
+  const handleSelectClient = (client: Customer) => {
+    setSelectedClient(client);
+    setClientName(client.name);
+    setShowSuggestions(false);
   };
 
   const handleNextStep = () => {
@@ -390,27 +414,64 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
             </div>
             
             <div className="space-y-4">
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => handleClientSearch(e.target.value)}
-                placeholder="Enter client name or company..."
-                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => handleClientSearch(e.target.value)}
+                  onFocus={() => {
+                    if (clientSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Delay hiding suggestions to allow clicking
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
+                  placeholder="Enter client name or company..."
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                
+                {/* Client Suggestions Dropdown */}
+                {showSuggestions && clientSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {clientSuggestions.map((client, index) => (
+                      <div
+                        key={client.id || index}
+                        onClick={() => handleSelectClient(client)}
+                        className="px-4 py-3 hover:bg-slate-700 cursor-pointer border-b border-slate-600 last:border-b-0 transition-colors"
+                      >
+                        <div className="font-medium text-white">{client.name}</div>
+                        {client.company && <div className="text-sm text-gray-300">{client.company}</div>}
+                        <div className="text-sm text-gray-400">{client.email}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               {selectedClient && (
                 <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
                   <div className="flex items-center text-green-400 mb-2">
                     <Check className="w-5 h-5 mr-2" />
-                    <span className="font-semibold">Client Found!</span>
+                    <span className="font-semibold">Client Selected!</span>
                   </div>
                   <p className="text-white">{selectedClient.name}</p>
                   {selectedClient.company && <p className="text-gray-300">{selectedClient.company}</p>}
                   <p className="text-gray-400">{selectedClient.email}</p>
+                  <button
+                    onClick={() => {
+                      setSelectedClient(null);
+                      setClientName('');
+                    }}
+                    className="mt-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Clear selection
+                  </button>
                 </div>
               )}
               
-              {clientName && !selectedClient && (
+              {clientName && !selectedClient && clientSuggestions.length === 0 && clientName.length >= 2 && (
                 <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
                   <div className="flex items-center text-yellow-400 mb-2">
                     <User className="w-5 h-5 mr-2" />
@@ -611,15 +672,35 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
               <div className="text-center py-8">
                 <p className="text-gray-400 mb-4">No currencies available. Please set up currencies in Settings first.</p>
                 <button
-                  onClick={() => {
-                    // Initialize default currencies
-                    currencyService.initializeDefaultCurrencies().then(() => {
-                      loadCurrencies();
-                    });
+                  onClick={async () => {
+                    setInitializingCurrencies(true);
+                    try {
+                      const success = await currencyService.initializeDefaultCurrencies();
+                      if (success) {
+                        await loadCurrencies();
+                      } else {
+                        console.error('Failed to initialize default currencies');
+                      }
+                    } catch (error) {
+                      console.error('Error initializing currencies:', error);
+                    } finally {
+                      setInitializingCurrencies(false);
+                    }
                   }}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+                  disabled={initializingCurrencies}
+                  className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
-                  Initialize Default Currencies
+                  {initializingCurrencies ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Initializing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Coins className="w-5 h-5" />
+                      <span>Initialize Default Currencies</span>
+                    </>
+                  )}
                 </button>
               </div>
             )}
