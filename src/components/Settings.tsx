@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Settings as SettingsIcon, Building, Upload, X } from 'lucide-react';
+import { Save, Settings as SettingsIcon, Building, Upload, X, Sparkles } from 'lucide-react';
 import { getCompanyProfile, createCompanyProfile, updateCompanyProfile, uploadLogo } from '../services/companyService';
 import { PDFTemplateSelector } from './PDFTemplateSelector';
 import { ProfessionIcon } from './ProfessionIcon';
@@ -9,6 +9,10 @@ import { PROFESSION_OPTIONS, ProfessionType } from '../constants/professions';
 
 export const Settings: React.FC = () => {
   const { settings, updateSettings, updateProfession, loading: settingsLoading } = useSettings();
+  const [currentMode] = useState<'quotepro' | 'ai-assistant'>(() => {
+    const savedMode = localStorage.getItem('proforma_app_mode');
+    return (savedMode === 'ai-assistant' ? 'ai-assistant' : 'quotepro');
+  });
   const [companyProfile, setCompanyProfile] = useState<Omit<CompanyProfile, 'id' | 'user_id'>>({
     company_name: '',
     address: '',
@@ -333,6 +337,55 @@ export const Settings: React.FC = () => {
                       <span className="hidden xs:inline">{saving || logoUploading ? 'Saving...' : 'Save Company Profile'}</span>
                       <span className="xs:hidden">{saving || logoUploading ? 'Saving...' : 'Save Profile'}</span>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mode Switching Info */}
+            <div className="bg-white shadow-sm rounded-lg">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 mr-2" />
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Application Mode</h2>
+                </div>
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
+                  Current mode and switching information
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-700">Current Mode:</span>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 rounded-full ${
+                        currentMode === 'quotepro' ? 'bg-blue-500' : 'bg-purple-500'
+                      }`}></div>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {currentMode === 'quotepro' ? 'QuotePro' : 'AI Q2I Assistant'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <p>
+                      <strong>QuotePro:</strong> Traditional quote and invoice management with full control
+                    </p>
+                    <p>
+                      <strong>AI Q2I Assistant:</strong> AI-guided workflow with smart suggestions
+                    </p>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-white text-xs font-bold">💡</span>
+                      </div>
+                      <div className="text-sm text-blue-800">
+                        <strong>Tip:</strong> Use the floating toggle button in the bottom-right corner to switch between modes instantly!
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

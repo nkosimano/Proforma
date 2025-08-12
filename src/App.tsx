@@ -11,6 +11,8 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import RecurringInvoices from './components/RecurringInvoices';
 import UserRoles from './components/UserRoles';
 import CurrencyManager from './components/CurrencyManager';
+import { SystemSelectionModal } from './components/SystemSelectionModal';
+import { AIAssistant } from './components/AIAssistant';
 import { getCurrentUser, signIn, signUp } from './lib/supabase';
 import { SettingsProvider } from './context/SettingsProvider';
 import { TerminologyProvider } from './context/TerminologyProvider';
@@ -19,6 +21,7 @@ import { Mail, Lock, LogIn, UserPlus } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 
 type Page = 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings' | 'analytics' | 'recurring' | 'roles' | 'currency' | 'reports';
+type AppMode = 'selection' | 'quotepro' | 'ai-assistant';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -28,6 +31,8 @@ function App() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [appMode, setAppMode] = useState<AppMode>('selection');
+  const [showSystemSelection, setShowSystemSelection] = useState(false);
 
 
   useEffect(() => {
@@ -35,6 +40,15 @@ function App() {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        if (currentUser) {
+          // Check if user has a preferred mode saved
+          const savedMode = localStorage.getItem('proforma_app_mode') as AppMode;
+          if (savedMode && savedMode !== 'selection') {
+            setAppMode(savedMode);
+          } else {
+            setShowSystemSelection(true);
+          }
+        }
       } catch (err) {
         console.error('Error checking user:', err);
       } finally {
@@ -65,6 +79,7 @@ function App() {
       } else if (result.data.user) {
         setUser(result.data.user);
         setFormData({ email: '', password: '' });
+        setShowSystemSelection(true);
       }
     } catch {
       setAuthError('An unexpected error occurred');
@@ -175,6 +190,31 @@ function App() {
     );
   }
 
+  const handleSelectQuotePro = () => {
+    setAppMode('quotepro');
+    setShowSystemSelection(false);
+    localStorage.setItem('proforma_app_mode', 'quotepro');
+  };
+
+  const handleSelectAIAssistant = () => {
+    setAppMode('ai-assistant');
+    setShowSystemSelection(false);
+    localStorage.setItem('proforma_app_mode', 'ai-assistant');
+  };
+
+  const handleBackToSelection = () => {
+    setAppMode('selection');
+    setShowSystemSelection(true);
+    localStorage.removeItem('proforma_app_mode');
+  };
+
+
+
+  const handleModeToggle = (newMode: 'quotepro' | 'ai-assistant') => {
+    setAppMode(newMode);
+    localStorage.setItem('proforma_app_mode', newMode);
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -204,15 +244,37 @@ function App() {
     }
   };
 
+  const renderAppContent = () => {
+    if (appMode === 'ai-assistant') {
+      return <AIAssistant onBack={handleBackToSelection} />;
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation 
+          currentPage={currentPage} 
+          onNavigate={setCurrentPage}
+          currentMode={appMode === 'ai-assistant' ? 'ai-assistant' : 'quotepro'}
+          onModeToggle={handleModeToggle}
+        />
+        {renderCurrentPage()}
+      </div>
+    );
+  };
+
   return (
     <ErrorBoundary>
       <SettingsProvider>
         <TerminologyProvider>
-          <div className="min-h-screen bg-gray-50">
-            <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+          {renderAppContent()}
+          
 
-            {renderCurrentPage()}
-          </div>
+          
+          <SystemSelectionModal
+            isOpen={showSystemSelection}
+            onSelectQuotePro={handleSelectQuotePro}
+            onSelectAIAssistant={handleSelectAIAssistant}
+          />
         </TerminologyProvider>
       </SettingsProvider>
     </ErrorBoundary>

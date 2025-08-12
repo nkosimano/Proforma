@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FileText, Settings, Home, Users, Receipt, UserCheck, BarChart3, RefreshCw, Shield, DollarSign, TrendingUp, ChevronDown, Menu, X } from 'lucide-react';
+import { FileText, Settings, Home, Users, Receipt, UserCheck, BarChart3, RefreshCw, Shield, DollarSign, TrendingUp, ChevronDown, Menu, X, Bot, Zap } from 'lucide-react';
 import { useSettings } from '../hooks/useSettings';
 import { useTerminology } from '../hooks/useTerminology';
 import { ProfessionIcon } from './ProfessionIcon';
@@ -7,6 +7,8 @@ import { ProfessionIcon } from './ProfessionIcon';
 interface NavigationProps {
   currentPage: 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings' | 'analytics' | 'recurring' | 'roles' | 'currency' | 'reports';
   onNavigate: (page: 'dashboard' | 'quote' | 'invoices' | 'customers' | 'history' | 'settings' | 'analytics' | 'recurring' | 'roles' | 'currency' | 'reports') => void;
+  currentMode?: 'quotepro' | 'ai-assistant';
+  onModeToggle?: (newMode: 'quotepro' | 'ai-assistant') => void;
 }
 
 
@@ -22,7 +24,7 @@ interface NavGroup {
   }>;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
+export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate, currentMode, onModeToggle }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -204,21 +206,50 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate 
             </div>
           </div>
           
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-3 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 min-h-touch min-w-touch"
-              aria-expanded={mobileMenuOpen}
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            >
-              <span className="sr-only">{mobileMenuOpen ? 'Close menu' : 'Open main menu'}</span>
-              {mobileMenuOpen ? (
-                <X className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="block h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
+          <div className="flex items-center space-x-3">
+            {/* Mode Toggle */}
+            {currentMode && onModeToggle && (
+              <div className="hidden sm:flex items-center">
+                <button
+                  onClick={() => onModeToggle(currentMode === 'quotepro' ? 'ai-assistant' : 'quotepro')}
+                  className={`relative inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 ${
+                    currentMode === 'ai-assistant'
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                      : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/25'
+                  }`}
+                >
+                  {currentMode === 'ai-assistant' ? (
+                    <div className="flex items-center space-x-2">
+                      <Bot className="w-4 h-4" />
+                      <span className="hidden md:inline">AI Q2I</span>
+                      <Zap className="w-3 h-3 text-yellow-300" />
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4" />
+                      <span className="hidden md:inline">QuotePro</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            )}
+            
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-3 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 min-h-touch min-w-touch"
+                aria-expanded={mobileMenuOpen}
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                <span className="sr-only">{mobileMenuOpen ? 'Close menu' : 'Open main menu'}</span>
+                {mobileMenuOpen ? (
+                  <X className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Menu className="block h-6 w-6" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

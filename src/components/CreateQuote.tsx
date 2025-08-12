@@ -3,7 +3,7 @@ import { Save, User, Building, FileText, ArrowLeft, Eye } from 'lucide-react';
 
 import { getAppSettings, saveQuote, incrementQuoteNumber, updateQuote } from '../services/quoteService';
 import { getCompanyProfile } from '../services/companyService';
-import { searchCustomers, CustomerSuggestion } from '../services/customerService';
+import { searchCustomers, CustomerSuggestion, createCustomer } from '../services/customerService';
 import { pdfTemplates } from '../constants/pdfTemplates';
 import { PDFGenerator, PDFGenerationResult } from '../utils/pdfGenerator';
 import { PDFPreviewModal } from './PDFPreviewModal';
@@ -86,15 +86,14 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     };
 
     loadData();
-  }, []);
+  }, [editingQuote, includeTax]);
 
   // Update terms when tax setting changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!editingQuote && settings && !settings.terms_and_conditions) {
       setCustomTerms(prevTerms => prevTerms.replace(/include 15% VAT|exclude VAT/, includeTax ? 'include 15% VAT' : 'exclude VAT'));
     }
-  }, [includeTax]);
+  }, [includeTax, editingQuote, settings]);
 
   const handleClientNameChange = async (value: string) => {
     setClientDetails({ ...clientDetails, name: value });
@@ -180,6 +179,21 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
       
       if (result) {
         setMessage({ type: 'success', text: `Quote ${editingQuote ? 'updated' : 'saved'} successfully!` });
+        
+        // Create customer record if it's a new quote and customer doesn't exist
+        if (!editingQuote && clientDetails.email) {
+          try {
+            await createCustomer({
+              name: clientDetails.name,
+              company: '',
+              email: clientDetails.email,
+              address: clientDetails.address,
+              phone: ''
+            });
+          } catch (error) {
+            console.log('Customer might already exist or error creating:', error);
+          }
+        }
         
         // Reset form only if creating new quote
         if (!editingQuote) {
