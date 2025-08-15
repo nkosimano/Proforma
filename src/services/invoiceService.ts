@@ -11,7 +11,7 @@ export const getInvoices = async (): Promise<Invoice[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching invoices:', error);
+
     return [];
   }
 
@@ -55,7 +55,7 @@ export const createInvoiceFromQuote = async (quote: Quote): Promise<Invoice | nu
     .single();
 
   if (error) {
-    console.error('Error creating invoice:', error);
+
     return null;
   }
 
@@ -93,7 +93,7 @@ export const updateInvoiceStatus = async (id: string, status: Invoice['status'],
     .eq('id', id);
 
   if (error) {
-    console.error('Error updating invoice status:', error);
+
     return false;
   }
 
@@ -110,7 +110,7 @@ export const updateQuoteStatus = async (id: string, status: Quote['status']): Pr
     .eq('id', id);
 
   if (error) {
-    console.error('Error updating quote status:', error);
+
     return false;
   }
 

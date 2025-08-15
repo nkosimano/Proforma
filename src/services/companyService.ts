@@ -25,7 +25,7 @@ export const getCompanyProfile = async (): Promise<CompanyProfile | null> => {
     .maybeSingle();
 
   if (error) {
-    console.error('Error fetching company profile:', error);
+
     return null;
   }
 
@@ -43,7 +43,7 @@ export const createCompanyProfile = async (profile: Omit<CompanyProfile, 'id' | 
     .single();
 
   if (error) {
-    console.error('Error creating company profile:', error);
+
     return null;
   }
 
@@ -59,7 +59,7 @@ export const updateCompanyProfile = async (id: string, profile: Partial<CompanyP
     .single();
 
   if (error) {
-    console.error('Error updating company profile:', error);
+
     return null;
   }
 

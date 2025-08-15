@@ -50,13 +50,13 @@ class RecurringInvoiceService {
         .single();
 
       if (error) {
-        console.error('Error creating recurring invoice:', error);
+    
         throw error;
       }
 
       return recurringInvoice;
     } catch (error) {
-      console.error('Error in createRecurringInvoice:', error);
+  
       return null;
     }
   }
@@ -69,15 +69,13 @@ class RecurringInvoiceService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Fetch recurring invoices with proper database-level joins (migrations applied)
       const { data, error } = await supabase
         .from('recurring_invoices')
         .select(`
           *,
-          customers (
-            name,
-            email
-          ),
-          template_invoice:invoices!template_invoice_id (
+          customers(name, email),
+          template_invoice:invoices!template_invoice_id(
             invoice_number,
             totals
           )
@@ -86,13 +84,13 @@ class RecurringInvoiceService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching recurring invoices:', error);
+    
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getRecurringInvoices:', error);
+  
       return [];
     }
   }
@@ -125,13 +123,13 @@ class RecurringInvoiceService {
         .single();
 
       if (error) {
-        console.error('Error fetching recurring invoice:', error);
+    
         throw error;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getRecurringInvoice:', error);
+  
       return null;
     }
   }
@@ -154,13 +152,13 @@ class RecurringInvoiceService {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error updating recurring invoice:', error);
+    
         throw error;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in updateRecurringInvoice:', error);
+  
       return false;
     }
   }
@@ -180,13 +178,13 @@ class RecurringInvoiceService {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error deleting recurring invoice:', error);
+    
         throw error;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in deleteRecurringInvoice:', error);
+  
       return false;
     }
   }
@@ -213,13 +211,13 @@ class RecurringInvoiceService {
         });
 
       if (error) {
-        console.error('Error generating recurring invoice:', error);
+    
         throw error;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in generateNextInvoice:', error);
+  
       return null;
     }
   }
@@ -277,13 +275,13 @@ class RecurringInvoiceService {
         .order('next_generation_date', { ascending: true });
 
       if (error) {
-        console.error('Error fetching due recurring invoices:', error);
+    
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getDueRecurringInvoices:', error);
+  
       return [];
     }
   }

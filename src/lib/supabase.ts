@@ -11,14 +11,14 @@ export const getCurrentUser = async () => {
   return user;
 };
 
-export const signUp = async (email: string, password: string) => {
+const signUpImpl = async (email: string, password: string) => {
   return await supabase.auth.signUp({
     email,
     password,
   });
 };
 
-export const signIn = async (email: string, password: string) => {
+const signInImpl = async (email: string, password: string) => {
   return await supabase.auth.signInWithPassword({
     email,
     password,
@@ -28,3 +28,7 @@ export const signIn = async (email: string, password: string) => {
 export const signOut = async () => {
   return await supabase.auth.signOut();
 };
+
+// Named exports for auth functions
+export const signUp = signUpImpl;
+export const signIn = signInImpl;

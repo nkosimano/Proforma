@@ -137,16 +137,19 @@ const Analytics: React.FC<AnalyticsProps> = ({ className = '' }) => {
       }
 
       // Fetch invoices data
+      // Fetch invoices with proper database-level joins (migrations applied)
       const { data: invoices, error: invoicesError } = await supabase
         .from('invoices')
         .select(`
           *,
-          customers(name),
-          payments(amount, payment_method, created_at)
+          customers(name, email),
+          payments(amount, gateway, created_at)
         `)
         .eq('user_id', user.id)
         .gte('created_at', startDate.toISOString())
         .lte('created_at', endDate.toISOString());
+
+      const userInvoices = invoices || [];
 
       if (invoicesError) throw invoicesError;
 
@@ -159,7 +162,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ className = '' }) => {
       if (customersError) throw customersError;
 
       // Process analytics data
-      const analyticsData = processAnalyticsData(invoices || [], customers || [], startDate, endDate);
+      const analyticsData = processAnalyticsData(userInvoices, customers || [], startDate, endDate);
       setData(analyticsData);
     } catch (error) {
       console.error('Error loading analytics data:', error);

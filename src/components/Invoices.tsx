@@ -86,7 +86,7 @@ export const Invoices: React.FC = () => {
   const generateInvoicePDF = (invoice: Invoice) => {
     if (!companyProfile || !settings) return;
 
-    console.log('Generating invoice PDF:', invoice);
+
 
     const selectedTemplate = pdfTemplates.find(t => t.id === settings.pdf_template) || pdfTemplates[0];
 
@@ -116,7 +116,7 @@ export const Invoices: React.FC = () => {
       }
     };
 
-    console.log('Invoice PDF Data prepared:', pdfData);
+
 
     // Generate PDF using the new utility
     PDFGenerator.generateQuotePDF(pdfData).catch(error => {

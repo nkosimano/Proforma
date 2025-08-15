@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Settings as SettingsIcon, Building, Upload, X, Sparkles } from 'lucide-react';
 import { getCompanyProfile, createCompanyProfile, updateCompanyProfile, uploadLogo } from '../services/companyService';
-import { PDFTemplateSelector } from './PDFTemplateSelector';
+import { PDFTemplateModal } from './PDFTemplateModal';
 import { ProfessionIcon } from './ProfessionIcon';
 import type { CompanyProfile } from '../types';
 import { useSettings } from '../hooks/useSettings';
 import { PROFESSION_OPTIONS, ProfessionType } from '../constants/professions';
+import { pdfTemplates } from '../constants/pdfTemplates';
 
 export const Settings: React.FC = () => {
   const { settings, updateSettings, updateProfession, loading: settingsLoading } = useSettings();
@@ -13,6 +14,7 @@ export const Settings: React.FC = () => {
     const savedMode = localStorage.getItem('proforma_app_mode');
     return (savedMode === 'ai-assistant' ? 'ai-assistant' : 'quotepro');
   });
+  const [showPDFTemplateModal, setShowPDFTemplateModal] = useState(false);
   const [companyProfile, setCompanyProfile] = useState<Omit<CompanyProfile, 'id' | 'user_id'>>({
     company_name: '',
     address: '',
@@ -23,6 +25,7 @@ export const Settings: React.FC = () => {
   });
   const [existingProfileId, setExistingProfileId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -43,7 +46,6 @@ export const Settings: React.FC = () => {
           setExistingProfileId(profileData.id);
         }
       } catch (error) {
-        console.error('Error loading company profile:', error);
         setMessage({ type: 'error', text: 'Failed to load company profile' });
       }
     };
@@ -51,45 +53,32 @@ export const Settings: React.FC = () => {
     loadCompanyProfile();
   }, []);
 
-  const handleSaveSettings = async () => {
+  const handleSaveAll = async () => {
     setSaving(true);
     setMessage(null);
 
     try {
-      // Settings are automatically saved through the context
-      setMessage({ type: 'success', text: 'Settings saved successfully!' });
-      setTimeout(() => setMessage(null), 3000);
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      setMessage({ type: 'error', text: 'Failed to save settings' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveCompanyProfile = async () => {
-    setSaving(true);
-    setMessage(null);
-
-    try {
-      let result;
+      // Save company profile first
+      let profileResult;
       if (existingProfileId) {
-        result = await updateCompanyProfile(existingProfileId, companyProfile);
+        profileResult = await updateCompanyProfile(existingProfileId, companyProfile);
       } else {
-        result = await createCompanyProfile(companyProfile);
-        if (result) {
-          setExistingProfileId(result.id);
+        profileResult = await createCompanyProfile(companyProfile);
+        if (profileResult) {
+          setExistingProfileId(profileResult.id);
         }
       }
-      if (result) {
-        setMessage({ type: 'success', text: 'Company profile saved successfully!' });
+
+      if (profileResult) {
+        // Settings are automatically saved through the context
+        setMessage({ type: 'success', text: 'All settings saved successfully!' });
+        setHasUnsavedChanges(false);
         setTimeout(() => setMessage(null), 3000);
       } else {
         setMessage({ type: 'error', text: 'Failed to save company profile' });
       }
     } catch (error) {
-      console.error('Error saving company profile:', error);
-      setMessage({ type: 'error', text: 'Failed to save company profile' });
+      setMessage({ type: 'error', text: 'Failed to save settings' });
     } finally {
       setSaving(false);
     }
@@ -109,15 +98,16 @@ export const Settings: React.FC = () => {
         setTimeout(() => setMessage(null), 3000);
       } else {
         await updateSettings({ [field]: value });
+        setHasUnsavedChanges(true);
       }
     } catch (error) {
-      console.error(`Error updating ${field}:`, error);
       setMessage({ type: 'error', text: `Failed to update ${field}` });
     }
   };
 
   const handleCompanyInputChange = (field: keyof typeof companyProfile, value: string) => {
     setCompanyProfile({ ...companyProfile, [field]: value });
+    setHasUnsavedChanges(true);
   };
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +139,6 @@ export const Settings: React.FC = () => {
         setMessage({ type: 'error', text: 'Failed to upload logo' });
       }
     } catch (error) {
-      console.error('Error uploading logo:', error);
       setMessage({ type: 'error', text: 'Failed to upload logo' });
     } finally {
       setLogoUploading(false);
@@ -326,19 +315,7 @@ export const Settings: React.FC = () => {
               </div>
             </div>
 
-                <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleSaveCompanyProfile}
-                      disabled={saving || logoUploading || !companyProfile.company_name || !companyProfile.email || !companyProfile.address}
-                      className="inline-flex items-center justify-center w-full xs:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-400 transition-colors min-h-touch"
-                    >
-                      <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                      <span className="hidden xs:inline">{saving || logoUploading ? 'Saving...' : 'Save Company Profile'}</span>
-                      <span className="xs:hidden">{saving || logoUploading ? 'Saving...' : 'Save Profile'}</span>
-                    </button>
-                  </div>
-                </div>
+
               </div>
             </div>
 
@@ -540,19 +517,7 @@ export const Settings: React.FC = () => {
               <p className="mt-2 text-sm text-gray-500">These terms will be used as default for new quotes (can be customized per quote)</p>
             </div>
 
-                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleSaveSettings}
-                      disabled={saving}
-                      className="inline-flex items-center justify-center w-full xs:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors min-h-touch"
-                    >
-                      <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                      <span className="hidden xs:inline">{saving ? 'Saving...' : 'Save Settings'}</span>
-                      <span className="xs:hidden">{saving ? 'Saving...' : 'Save'}</span>
-                    </button>
-                  </div>
-                </div>
+
               </div>
             </div>
 
@@ -565,13 +530,103 @@ export const Settings: React.FC = () => {
                 </p>
               </div>
               <div className="p-4 sm:p-6">
-                <PDFTemplateSelector
-                  selectedTemplate={settings.pdf_template}
-                  onTemplateChange={(templateId) => handleInputChange('pdf_template', templateId)}
-                />
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-8 rounded border border-gray-300 overflow-hidden">
+                      {(() => {
+                         const currentTemplate = settings.pdf_template;
+                         const template = currentTemplate ? 
+                           pdfTemplates.find(t => t.id === currentTemplate) : 
+                           pdfTemplates[0];
+                         
+                         if (template?.gradient) {
+                           return (
+                             <div
+                               style={{ background: template.gradient }}
+                               className="w-full h-full"
+                             />
+                           );
+                         } else if (template) {
+                           return (
+                             <div className="flex h-full">
+                               <div
+                                 style={{ backgroundColor: template.primary }}
+                                 className="flex-1"
+                               />
+                               <div
+                                 style={{ backgroundColor: template.secondary }}
+                                 className="flex-1"
+                               />
+                               <div
+                                 style={{ backgroundColor: template.accent }}
+                                 className="flex-1"
+                               />
+                             </div>
+                           );
+                         }
+                         return <div className="w-full h-full bg-gray-200" />;
+                       })()}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {(() => {
+                           const currentTemplate = settings.pdf_template;
+                           const template = currentTemplate ? 
+                             pdfTemplates.find(t => t.id === currentTemplate) : 
+                             pdfTemplates[0];
+                           return template?.name || 'Classic Blue';
+                         })()}
+                      </h3>
+                      <p className="text-sm text-gray-600">Current PDF color theme</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowPDFTemplateModal(true)}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors space-x-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Choose Template</span>
+                  </button>
+                </div>
               </div>
             </div>
            </div>
+        </div>
+
+        {/* Consolidated Save Button */}
+        <div className="mt-6 sm:mt-8 bg-white shadow-sm rounded-lg border-2 border-blue-200">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-3 h-3 rounded-full ${
+                  hasUnsavedChanges ? 'bg-orange-500 animate-pulse' : 'bg-green-500'
+                }`}></div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {hasUnsavedChanges ? 'Unsaved Changes' : 'All Settings Saved'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {hasUnsavedChanges 
+                      ? 'You have unsaved changes. Click Save All Settings to apply them.' 
+                      : 'All your settings and company profile are up to date.'
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleSaveAll}
+                disabled={saving || logoUploading || !companyProfile.company_name || !companyProfile.email || !companyProfile.address}
+                className={`inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold transition-all duration-200 min-h-touch ${
+                  hasUnsavedChanges 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transform hover:scale-105' 
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                } disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none`}
+              >
+                <Save className="h-5 w-5 mr-2" />
+                <span>{saving || logoUploading ? 'Saving...' : 'Save All Settings'}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 sm:mt-8 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
@@ -591,6 +646,17 @@ export const Settings: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* PDF Template Modal */}
+      <PDFTemplateModal
+        isOpen={showPDFTemplateModal}
+        onClose={() => setShowPDFTemplateModal(false)}
+        selectedTemplate={settings.pdf_template}
+        onTemplateChange={(templateId) => {
+          handleInputChange('pdf_template', templateId);
+          setShowPDFTemplateModal(false);
+        }}
+      />
     </div>
   );
 };

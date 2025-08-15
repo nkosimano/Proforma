@@ -132,7 +132,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
       const profile = await getCompanyProfile();
       setCompanyProfile(profile);
     } catch (error) {
-      console.error('Error loading company profile:', error);
+
     }
   };
 
@@ -178,6 +178,21 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
   const handleNextStep = () => {
     const steps: Step[] = ['client-identification', 'client-details', 'document-type', 'currency-selection', 'services', 'approval', 'completion'];
     const currentIndex = steps.indexOf(currentStep);
+    
+    // Enhanced logic for client-identification to client-details transition
+    if (currentStep === 'client-identification' && !selectedClient && clientName) {
+      // Parse the client name and pre-populate the details
+      const nameParts = clientName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      
+      setClientDetails(prev => ({
+        ...prev,
+        name: firstName,
+        surname: lastName
+      }));
+    }
+    
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1]);
     }
@@ -333,13 +348,13 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
                 phone: clientInfo.phone || ''
               });
             } catch (error) {
-              console.log('Customer might already exist or error creating:', error);
+      
             }
           }
         }
       } else {
         // Create invoice logic here
-        console.log('Creating invoice:', { clientInfo, lineItems, total });
+    
       }
 
       setCurrentStep('completion');
@@ -506,20 +521,37 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onBack }) => {
               <p className="text-gray-300">Let's collect the client information for our records</p>
             </div>
             
+            {/* Show helpful message if name was pre-populated */}
+            {(clientDetails.name || clientDetails.surname) && (
+              <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
+                <div className="flex items-center text-blue-400 mb-2">
+                  <Check className="w-5 h-5 mr-2" />
+                  <span className="font-semibold">Name Pre-filled</span>
+                </div>
+                <p className="text-gray-300 text-sm">
+                  We've automatically filled in the name from your search. You can edit it if needed.
+                </p>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
                 value={clientDetails.name}
                 onChange={(e) => setClientDetails(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="First Name"
-                className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`px-4 py-3 bg-slate-700 border rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  clientDetails.name ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600'
+                }`}
               />
               <input
                 type="text"
                 value={clientDetails.surname}
                 onChange={(e) => setClientDetails(prev => ({ ...prev, surname: e.target.value }))}
                 placeholder="Last Name"
-                className="px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`px-4 py-3 bg-slate-700 border rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  clientDetails.surname ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600'
+                }`}
               />
               <input
                 type="text"

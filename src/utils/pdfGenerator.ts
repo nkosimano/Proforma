@@ -51,7 +51,7 @@ export class PDFGenerator {
   }
 
   static async generateQuotePDFBlob(data: PDFQuoteData): Promise<PDFGenerationResult> {
-    console.log('Starting PDF generation with data:', data);
+
     
     let container: HTMLElement | null = null;
     
@@ -77,11 +77,11 @@ export class PDFGenerator {
       
       // Add to DOM
       document.body.appendChild(container);
-      console.log('Container added to DOM');
+  
       
       // Wait for any images to load
       await this.waitForImages(container);
-      console.log('Images loaded');
+  
       
       // Wait a bit more for full rendering
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -117,7 +117,7 @@ export class PDFGenerator {
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
-      console.log('Starting PDF generation...');
+  
       
       // Generate PDF as blob
       const pdfBlob = await (window as Window & {
@@ -130,7 +130,7 @@ export class PDFGenerator {
         };
       }).html2pdf().set(options).from(container).outputPdf('blob');
       
-      console.log('PDF generated successfully');
+  
       
       return {
         blob: pdfBlob,

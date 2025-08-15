@@ -60,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     if (!companyProfile) return;
 
     setGeneratingPDF(true);
-    console.log('Generating PDF for quote:', quote);
+
 
     try {
       // Get app settings for template
@@ -68,8 +68,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       const settings = await getAppSettings();
       const selectedTemplate = pdfTemplates.find(t => t.id === settings?.pdf_template) || pdfTemplates[0];
       
-      console.log('Settings loaded:', settings);
-      console.log('Selected template:', selectedTemplate);
+      
 
       // Filter valid line items for PDF - include items with descriptions
       const validLineItems = quote.line_items.filter(item => 
@@ -103,7 +102,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         }
       };
 
-      console.log('Dashboard PDF Data prepared:', pdfData);
+  
 
       // Generate PDF blob for preview
       const result = await PDFGenerator.generateQuotePDFBlob(pdfData);

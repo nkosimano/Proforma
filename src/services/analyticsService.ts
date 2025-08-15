@@ -323,7 +323,7 @@ export const analyticsService = {
 
       return data;
     } catch (error) {
-      console.error('Error fetching monthly trends:', error);
+
       return [];
     }
   },

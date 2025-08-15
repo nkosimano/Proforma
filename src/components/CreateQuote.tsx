@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
+import { gsap } from 'gsap';
 import { Save, User, Building, FileText, ArrowLeft, Eye } from 'lucide-react';
 
 import { getAppSettings, saveQuote, incrementQuoteNumber, updateQuote } from '../services/quoteService';
@@ -26,6 +27,13 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   const [customerSuggestions, setCustomerSuggestions] = useState<CustomerSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchingCustomers, setSearchingCustomers] = useState(false);
+  
+  // Animation refs
+  const containerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const lineItemsRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
   
   // PDF Preview state
   const [showPDFPreview, setShowPDFPreview] = useState(false);
@@ -88,6 +96,45 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     loadData();
   }, [editingQuote, includeTax]);
 
+  // Entrance animations
+  useEffect(() => {
+    if (!loading && containerRef.current) {
+      const tl = gsap.timeline();
+      
+      // Set initial states
+      gsap.set([headerRef.current, formRef.current, lineItemsRef.current, actionsRef.current], {
+        opacity: 0,
+        y: 30
+      });
+      
+      // Animate elements in sequence
+      tl.to(headerRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      })
+      .to(formRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.3')
+      .to(lineItemsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.3')
+      .to(actionsRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.3');
+    }
+  }, [loading]);
+
   // Update terms when tax setting changes
   useEffect(() => {
     if (!editingQuote && settings && !settings.terms_and_conditions) {
@@ -125,7 +172,24 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     setCustomerSuggestions([]);
   };
 
+  // Animation helper functions
+  const animateButtonHover = (element: HTMLElement, isEntering: boolean) => {
+    gsap.to(element, {
+      scale: isEntering ? 1.02 : 1,
+      duration: 0.2,
+      ease: 'power2.out'
+    });
+  };
 
+  const animateFormFocus = (element: HTMLElement, isFocused: boolean) => {
+    gsap.to(element, {
+      scale: isFocused ? 1.01 : 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    });
+  };
+
+  // Removed unused animateLineItemAdd function
 
   const calculateTotals = (items = lineItems): QuoteTotals => {
     const validItems = items.filter(item => 
@@ -191,7 +255,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
               phone: ''
             });
           } catch (error) {
-            console.log('Customer might already exist or error creating:', error);
+    
           }
         }
         
@@ -229,7 +293,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
     setMessage(null);
 
     try {
-      console.log('Generate PDF clicked');
+  
       const selectedTemplate = pdfTemplates.find(t => t.id === settings.pdf_template) || pdfTemplates[0];
       const currentQuoteNumber = editingQuote ? editingQuote.quote_number : quoteNumber;
       const totals = calculateTotals(lineItems);
@@ -257,7 +321,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
         }
       };
 
-      console.log('PDF Data prepared:', pdfData);
+  
 
       // Generate PDF blob for preview
       const result = await PDFGenerator.generateQuotePDFBlob(pdfData);
@@ -336,9 +400,9 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
   const totals = calculateTotals();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+    <div ref={containerRef} className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
-        <div className="mb-6 sm:mb-8">
+        <div ref={headerRef} className="mb-6 sm:mb-8">
           <div className="flex items-center mb-3 sm:mb-4">
             {editingQuote && onBack && (
               <button onClick={onBack} className="mr-3 sm:mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors min-h-touch min-w-touch">
@@ -377,7 +441,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
 
           <div className="p-4 sm:p-6">
             {/* Client Details Section */}
-            <div className="mb-6 sm:mb-8">
+            <div ref={formRef} className="mb-6 sm:mb-8">
               <div className="flex items-center mb-3 sm:mb-4">
                 <User className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-2" />
                 <h3 className="text-base sm:text-lg font-medium text-gray-900">Client Details</h3>
@@ -392,16 +456,18 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                       type="text"
                       value={clientDetails.name}
                       onChange={(e) => handleClientNameChange(e.target.value)}
-                      onFocus={() => {
+                      onFocus={(e) => {
                         if (customerSuggestions.length > 0) {
                           setShowSuggestions(true);
                         }
+                        animateFormFocus(e.target, true);
                       }}
-                      onBlur={() => {
+                      onBlur={(e) => {
                         // Delay hiding suggestions to allow clicking
                         setTimeout(() => setShowSuggestions(false), 200);
+                        animateFormFocus(e.target, false);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch transition-all duration-200"
                       placeholder="Enter client name (type 2+ letters for suggestions)"
                     />
                     
@@ -437,7 +503,9 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                     type="email"
                     value={clientDetails.email}
                     onChange={(e) => setClientDetails({ ...clientDetails, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    onFocus={(e) => animateFormFocus(e.target, true)}
+                    onBlur={(e) => animateFormFocus(e.target, false)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch transition-all duration-200"
                     placeholder="Enter client email"
                   />
                 </div>
@@ -448,8 +516,10 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                   <textarea
                     value={clientDetails.address}
                     onChange={(e) => setClientDetails({ ...clientDetails, address: e.target.value })}
+                    onFocus={(e) => animateFormFocus(e.target, true)}
+                    onBlur={(e) => animateFormFocus(e.target, false)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch transition-all duration-200"
                     placeholder="Enter client address"
                   />
                 </div>
@@ -479,7 +549,7 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
             </div>
 
             {/* Line Items Section */}
-            <div className="mb-8">
+            <div ref={lineItemsRef} className="mb-8">
               <Suspense fallback={
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -508,9 +578,11 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
               <textarea
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
+                onFocus={(e) => animateFormFocus(e.target, true)}
+                onBlur={(e) => animateFormFocus(e.target, false)}
                onPaste={(e) => e.stopPropagation()}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch text-sm sm:text-base"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-touch text-sm sm:text-base transition-all duration-200"
                 placeholder="Add any additional comments or terms..."
               />
             </div>
@@ -523,9 +595,11 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
               <textarea
                 value={customTerms}
                 onChange={(e) => setCustomTerms(e.target.value)}
+                onFocus={(e) => animateFormFocus(e.target, true)}
+                onBlur={(e) => animateFormFocus(e.target, false)}
                onPaste={(e) => e.stopPropagation()}
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm min-h-touch"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm min-h-touch transition-all duration-200"
                 placeholder="Enter your terms and conditions..."
               />
             </div>
@@ -558,10 +632,12 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+            <div ref={actionsRef} className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
               <div className="flex flex-col xs:flex-row justify-end gap-3 xs:gap-4">
                 <button
                   onClick={generatePDF}
+                  onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                  onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
                   disabled={generatingPDF || !clientDetails.name || !clientDetails.address || !clientDetails.email}
                   className="inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 transition-colors min-h-touch text-sm sm:text-base"
                 >
@@ -581,6 +657,8 @@ export const CreateQuote: React.FC<CreateQuoteProps> = ({ editingQuote, onBack }
                 </button>
                 <button
                   onClick={handleSaveQuote}
+                  onMouseEnter={(e) => animateButtonHover(e.currentTarget, true)}
+                  onMouseLeave={(e) => animateButtonHover(e.currentTarget, false)}
                   disabled={saving || !clientDetails.name || !clientDetails.address || !clientDetails.email}
                   className="inline-flex items-center justify-center px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors min-h-touch text-sm sm:text-base"
                 >

@@ -21,6 +21,24 @@ body {
   min-width: 320px;
 }
 
+/* Allow dropdowns to be visible by preventing overflow clipping on navigation containers */
+nav,
+.navigation-container {
+  overflow: visible !important;
+}
+
+/* Ensure dropdown menus are not clipped */
+.dropdown-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Fix for absolutely positioned elements in navigation */
+.nav-dropdown {
+  position: absolute;
+  z-index: 9999;
+}
+
 /* Prevent horizontal scroll on mobile */
 .container,
 .max-w-7xl,
@@ -35,6 +53,12 @@ body {
 .max-w-sm {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+/* Exception for navigation containers to allow dropdowns */
+nav .container,
+nav .max-w-7xl {
+  overflow: visible !important;
 }
 
 /* Mobile table fixes */

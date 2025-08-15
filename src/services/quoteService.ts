@@ -12,7 +12,7 @@ export const getAppSettings = async (): Promise<AppSettings | null> => {
     .maybeSingle();
 
   if (error && error.code !== 'PGRST116') {
-    console.error('Error fetching app settings:', error);
+
     return null;
   }
 
@@ -35,7 +35,7 @@ export const upsertAppSettings = async (settings: Omit<AppSettings, 'id' | 'user
     .single();
 
   if (error) {
-    console.error('Error upserting app settings:', error);
+
     return null;
   }
 
@@ -62,7 +62,7 @@ export const saveQuote = async (quote: Omit<Quote, 'id'>): Promise<Quote | null>
     .single();
 
   if (error) {
-    console.error('Error saving quote:', error);
+
     return null;
   }
 
@@ -85,7 +85,7 @@ export const incrementQuoteNumber = async (): Promise<boolean> => {
     .eq('user_id', user.id);
 
   if (error) {
-    console.error('Error incrementing quote number:', error);
+
     return false;
   }
 
@@ -102,7 +102,7 @@ export const getQuotes = async (): Promise<Quote[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching quotes:', error);
+
     return [];
   }
 
@@ -134,7 +134,7 @@ export const updateQuote = async (id: string, quote: Partial<Quote>): Promise<Qu
     .single();
 
   if (error) {
-    console.error('Error updating quote:', error);
+
     return null;
   }
 
@@ -153,7 +153,7 @@ export const updateQuoteStatus = async (id: string, status: Quote['status']): Pr
     .eq('id', id);
 
   if (error) {
-    console.error('Error updating quote status:', error);
+
     return false;
   }
 
@@ -167,7 +167,7 @@ export const deleteQuote = async (id: string): Promise<boolean> => {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting quote:', error);
+
     return false;
   }
 

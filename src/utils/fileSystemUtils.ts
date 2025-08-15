@@ -116,7 +116,7 @@ export class FileSystemUtils {
       await writable.write(options.pdfBlob);
       await writable.close();
 
-      console.log(`PDF saved to backup: ${options.type}/${options.fileName}`);
+
       return true;
     } catch (error) {
       console.error('Failed to save to backup:', error);

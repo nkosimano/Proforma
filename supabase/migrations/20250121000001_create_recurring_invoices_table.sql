@@ -1,7 +1,7 @@
 -- Create recurring_invoices table
 CREATE TABLE IF NOT EXISTS public.recurring_invoices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID NOT NULL REFERENCES public.customers(id) ON DELETE CASCADE,
+    customer_id UUID NOT NULL, -- Will add foreign key constraint later after customers table exists
     template_data JSONB NOT NULL,
     frequency TEXT NOT NULL CHECK (frequency IN ('daily', 'weekly', 'monthly', 'quarterly', 'yearly')),
     start_date DATE NOT NULL,

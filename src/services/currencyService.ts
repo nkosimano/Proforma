@@ -52,24 +52,19 @@ class CurrencyService {
    */
   async getCurrencies(): Promise<Currency[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
       const { data, error } = await supabase
         .from('currencies')
         .select('*')
-        .eq('user_id', user.id)
-        .order('is_default', { ascending: false })
         .order('code', { ascending: true });
 
       if (error) {
-        console.error('Error fetching currencies:', error);
+    
         throw error;
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getCurrencies:', error);
+  
       return [];
     }
   }
@@ -79,44 +74,42 @@ class CurrencyService {
    */
   async addCurrency(currencyCode: string, isDefault: boolean = false): Promise<Currency | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
       const currencyInfo = this.COMMON_CURRENCIES.find(c => c.code === currencyCode);
       if (!currencyInfo) {
         throw new Error(`Unsupported currency code: ${currencyCode}`);
       }
 
-      // If setting as default, unset other defaults first
-      if (isDefault) {
-        await supabase
-          .from('currencies')
-          .update({ is_default: false })
-          .eq('user_id', user.id);
+      // Check if currency already exists
+      const { data: existing } = await supabase
+        .from('currencies')
+        .select('*')
+        .eq('code', currencyCode)
+        .single();
+
+      if (existing) {
+        return existing;
       }
 
       const { data, error } = await supabase
         .from('currencies')
         .insert({
-          user_id: user.id,
           code: currencyCode,
           name: currencyInfo.name,
           symbol: currencyInfo.symbol,
-          is_default: isDefault,
-          exchange_rate: 1.0, // Will be updated by exchange rate service
-          last_updated: new Date().toISOString()
+          exchange_rate: 1.0,
+          is_active: true
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error adding currency:', error);
+    
         throw error;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in addCurrency:', error);
+  
       return null;
     }
   }
@@ -139,13 +132,13 @@ class CurrencyService {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error updating exchange rate:', error);
+    
         throw error;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in updateExchangeRate:', error);
+  
       return false;
     }
   }
@@ -172,13 +165,13 @@ class CurrencyService {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error setting default currency:', error);
+    
         throw error;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in setDefaultCurrency:', error);
+  
       return false;
     }
   }
@@ -198,13 +191,13 @@ class CurrencyService {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error removing currency:', error);
+    
         throw error;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in removeCurrency:', error);
+  
       return false;
     }
   }
@@ -214,24 +207,21 @@ class CurrencyService {
    */
   async getDefaultCurrency(): Promise<Currency | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { data, error } = await supabase
-        .from('currencies')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_default', true)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        console.error('Error fetching default currency:', error);
-        throw error;
+      // Get all currencies and return the first one as default
+      const currencies = await this.getCurrencies();
+      
+      if (currencies.length === 0) {
+        // If no currencies exist, initialize defaults
+        await this.initializeDefaultCurrencies();
+        const newCurrencies = await this.getCurrencies();
+        return newCurrencies[0] || null;
       }
-
-      return data || null;
+      
+      // Return USD if available, otherwise first currency
+      const usd = currencies.find(c => c.code === 'USD');
+      return usd || currencies[0] || null;
     } catch (error) {
-      console.error('Error in getDefaultCurrency:', error);
+  
       return null;
     }
   }
@@ -256,7 +246,7 @@ class CurrencyService {
       const data: ExchangeRateResponse = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
+  
       return null;
     }
   }
@@ -341,7 +331,7 @@ class CurrencyService {
         timestamp: new Date()
       };
     } catch (error) {
-      console.error('Error in convertCurrency:', error);
+  
       return null;
     }
   }
@@ -406,7 +396,7 @@ class CurrencyService {
 
       return false;
     } catch (error) {
-      console.error('Error initializing default currencies:', error);
+  
       return false;
     }
   }
@@ -430,7 +420,7 @@ class CurrencyService {
 
       return toCurr.exchange_rate / fromCurr.exchange_rate;
     } catch (error) {
-      console.error('Error getting exchange rate:', error);
+  
       return null;
     }
   }

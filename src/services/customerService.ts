@@ -19,7 +19,7 @@ export const getAllCustomers = async (): Promise<Customer[]> => {
     .order('name');
 
   if (error) {
-    console.error('Error fetching customers:', error);
+
     return [];
   }
 
@@ -39,7 +39,7 @@ export const getCustomerById = async (id: string): Promise<Customer | null> => {
     .single();
 
   if (error) {
-    console.error('Error fetching customer:', error);
+
     return null;
   }
 
@@ -61,7 +61,7 @@ export const createCustomer = async (customer: Omit<Customer, 'id' | 'user_id' |
     .single();
 
   if (error) {
-    console.error('Error creating customer:', error);
+
     return null;
   }
 
@@ -82,7 +82,7 @@ export const updateCustomer = async (id: string, updates: Partial<Omit<Customer,
     .single();
 
   if (error) {
-    console.error('Error updating customer:', error);
+
     return null;
   }
 
@@ -101,7 +101,7 @@ export const deleteCustomer = async (id: string): Promise<boolean> => {
     .eq('user_id', user.id);
 
   if (error) {
-    console.error('Error deleting customer:', error);
+
     return false;
   }
 
@@ -123,7 +123,7 @@ export const searchCustomers = async (query: string): Promise<CustomerSuggestion
     .limit(10);
 
   if (error) {
-    console.error('Error searching customers:', error);
+
     return [];
   }
 

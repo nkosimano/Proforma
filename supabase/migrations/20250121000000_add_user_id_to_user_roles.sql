@@ -6,25 +6,11 @@ ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCAD
 ALTER TABLE public.user_roles 
 ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
 
--- Update existing records to assign to the first authenticated user (if any)
-DO $$
-DECLARE
-    first_user_id UUID;
-BEGIN
-    -- Get the first user from auth.users
-    SELECT id INTO first_user_id FROM auth.users LIMIT 1;
-    
-    -- If we have a user, update existing records
-    IF first_user_id IS NOT NULL THEN
-        UPDATE public.user_roles 
-        SET 
-            user_id = first_user_id,
-            created_by = first_user_id
-        WHERE user_id IS NULL;
-    END IF;
-END $$;
+-- Delete any existing user_roles records that don't have a valid user_id
+-- This is safe for development/testing environments
+DELETE FROM public.user_roles WHERE user_id IS NULL;
 
--- Make user_id NOT NULL after updating existing records
+-- Make user_id NOT NULL after cleaning up existing records
 ALTER TABLE public.user_roles 
 ALTER COLUMN user_id SET NOT NULL;
 
